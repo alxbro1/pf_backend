@@ -9,3 +9,4 @@ import { ProductsRepository } from './products.repository';
   providers: [ProductsService, ProductsRepository],
 })
 export class ProductsModule {}
+

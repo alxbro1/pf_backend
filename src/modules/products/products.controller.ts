@@ -3,15 +3,16 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   BadRequestException,
   ParseUUIDPipe,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { InsertProduct, productInsertSchema } from '../../../db/schema';
+import { number } from 'zod';
 
 @Controller('products')
 export class ProductsController {
