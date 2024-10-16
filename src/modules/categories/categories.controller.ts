@@ -18,9 +18,9 @@ export class CategoriesController {
     return this.categoriesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoriesService.findOne(+id);
+  @Get(':uuid')
+  findOne(@Param('uuid') id: string) {
+    return this.categoriesService.findOne(id);
   }
 
   @Post()
@@ -28,13 +28,13 @@ export class CategoriesController {
     return this.categoriesService.create(createCategoryDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: any) {
-    return this.categoriesService.update(+id, updateCategoryDto);
+  @Patch(':uuid')
+  update(@Param('uuid') id: string, @Body() updateCategoryDto: any) {
+    return this.categoriesService.update(id, updateCategoryDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoriesService.remove(+id);
+  @Delete(':uuid')
+  remove(@Param('uuid') id: string) {
+    return this.categoriesService.remove(id);
   }
 }
