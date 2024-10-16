@@ -8,33 +8,36 @@ import {
   Delete,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
+import { InsertCategory } from '../../../db/schema';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get()
-  findAll() {
+  async findAll(): Promise<InsertCategory[]> {
     return this.categoriesService.findAll();
   }
 
   @Get(':uuid')
-  findOne(@Param('uuid') id: string) {
+  async findOne(@Param('uuid') id: string): Promise<InsertCategory> {
     return this.categoriesService.findOne(id);
   }
 
   @Post()
-  create(@Body() createCategoryDto: any) {
-    return this.categoriesService.create(createCategoryDto);
+  async create(
+    @Body() newCategoryData: InsertCategory,
+  ): Promise<InsertCategory[]> {
+    return this.categoriesService.create(newCategoryData);
   }
 
   @Patch(':uuid')
-  update(@Param('uuid') id: string, @Body() updateCategoryDto: any) {
+  async update(@Param('uuid') id: string, @Body() updateCategoryDto: any) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 
   @Delete(':uuid')
-  remove(@Param('uuid') id: string) {
+  async remove(@Param('uuid') id: string) {
     return this.categoriesService.remove(id);
   }
 }

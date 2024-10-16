@@ -1,24 +1,28 @@
 import { Injectable } from '@nestjs/common';
+import { CategoriesRepository } from './categories.repository';
+import { InsertCategory } from '../../../db/schema';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: any) {
-    return 'This action adds a new category';
+  constructor(private categoriesRepository: CategoriesRepository) {}
+
+  async findAll(): Promise<InsertCategory[]> {
+    return this.categoriesRepository.findAll();
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  async findOne(id: string): Promise<InsertCategory> {
+    return this.categoriesRepository.findOne(id);
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} category`;
+  async create(newCategoryData: InsertCategory): Promise<InsertCategory[]> {
+    return this.categoriesRepository.create(newCategoryData);
   }
 
-  update(id: string, updateCategoryDto: any) {
-    return `This action updates a #${id} category`;
+  async update(id: string, updateCategoryDto: any) {
+    return this.categoriesRepository.update(id, updateCategoryDto);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} category`;
+  async remove(id: string) {
+    return this.categoriesRepository.remove(id);
   }
 }
