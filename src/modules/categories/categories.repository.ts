@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { categories, InsertCategory } from '../../../db/schema';
 import { db } from '../../config/db';
 import { eq } from 'drizzle-orm';
@@ -15,7 +19,7 @@ export class CategoriesRepository {
     });
 
     if (!category)
-      throw new BadRequestException(`Category with uuid ${id} didn't exist.`);
+      throw new NotFoundException(`Category with uuid ${id} didn't exist.`);
 
     return category;
   }
@@ -26,12 +30,32 @@ export class CategoriesRepository {
       .values(newCategoryData)
       .returning();
 
-    if (!newCategory) throw new BadRequestException(`error creating category.`);
+    if (!newCategory) throw new BadRequestException(`Error creating category.`);
 
     return newCategory;
   }
 
-  async update(id: string, updateCategoryDto: any) {}
+  async update(
+    id: string,
+    newCategoryData: Partial<InsertCategory>,
+  ): Promise<InsertCategory[]> {
+    const updatedCategory = await db
+      .update(categories)
+      .set(newCategoryData)
+      .where(eq(categories.id, id))
+      .returning({ id: categories.id, name: categories.name });
 
-  async remove(id: string) {}
+    if (updatedCategory.length == 0)
+      throw new NotFoundException(`Category with uuid ${id} didn't exist.`);
+
+    return updatedCategory;
+  }
+
+  async remove(id: string): Promise<{ message: string }> {
+    const rowCount = (await db.delete(categories).where(eq(categories.id, id)))
+      .rowCount;
+    if (rowCount == 0)
+      throw new NotFoundException(`Category with uuid ${id} didn't exist.`);
+    return { message: 'Category deleted Successfuly.' };
+  }
 }

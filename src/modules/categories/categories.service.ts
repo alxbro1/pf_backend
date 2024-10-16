@@ -7,22 +7,25 @@ export class CategoriesService {
   constructor(private categoriesRepository: CategoriesRepository) {}
 
   async findAll(): Promise<InsertCategory[]> {
-    return this.categoriesRepository.findAll();
+    return await this.categoriesRepository.findAll();
   }
 
   async findOne(id: string): Promise<InsertCategory> {
-    return this.categoriesRepository.findOne(id);
+    return await this.categoriesRepository.findOne(id);
   }
 
   async create(newCategoryData: InsertCategory): Promise<InsertCategory[]> {
-    return this.categoriesRepository.create(newCategoryData);
+    return await this.categoriesRepository.create(newCategoryData);
   }
 
-  async update(id: string, updateCategoryDto: any) {
-    return this.categoriesRepository.update(id, updateCategoryDto);
+  async update(
+    id: string,
+    newCategoryData: Partial<InsertCategory>,
+  ): Promise<InsertCategory[]> {
+    return await this.categoriesRepository.update(id, newCategoryData);
   }
 
-  async remove(id: string) {
-    return this.categoriesRepository.remove(id);
+  async remove(id: string): Promise<{ message: string }> {
+    return await this.categoriesRepository.remove(id);
   }
 }
