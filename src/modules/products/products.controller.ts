@@ -8,10 +8,12 @@ import {
   BadRequestException,
   ParseUUIDPipe,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { InsertProduct, productInsertSchema } from '../../../db/schema';
 import { ApiTags } from '@nestjs/swagger';
+import { number } from 'zod';
 
 @Controller('products')
 @ApiTags('Products')

@@ -2,13 +2,14 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { db } from '../../config/db';
 import { InsertProduct, products } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 
 @Injectable()
-export class ProductsRepository {
+export class ProductsRepository { 
   constructor() {}
 
   async findAllProducts(): Promise<
