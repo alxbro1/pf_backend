@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Body,
+  Patch,
   Param,
   Delete,
   BadRequestException,
@@ -10,11 +11,9 @@ import {
   Put,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { InsertProduct, productInsertSchema } from '../../../db/schema';
-import { ApiTags } from '@nestjs/swagger';
+import { InsertProduct, productInsertSchema } from '../../db/schema';
 
 @Controller('products')
-@ApiTags('Products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
