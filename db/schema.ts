@@ -104,7 +104,7 @@ export const productInsertSchema = createInsertSchema(products, {
   stock: (schema) => schema.stock,
   categoryId: (schema) => schema.categoryId.uuid("ID must be UUID"),
 });
-export type InsertProduct = (typeof products.$inferInsert);
+export type InsertProduct = typeof products.$inferInsert;
 
 // export const productsRelations = relations(products, ({ many, one }) => ({
 //   ordersDetails: many(orders),
@@ -140,17 +140,17 @@ export const categories = pgTable('categories', {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: varchar({ length: 50 }).notNull(),
-  // fatherId: uuid('father_id'),
 });
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   products: many(products),
 }));
 
-const insertCategorySchema = createInsertSchema(categories, {
+export const insertCategorySchema = createInsertSchema(categories, {
   name: (schema) => schema.name.min(3).max(50),
 });
-export type InsertCategory = z.infer<typeof insertCategorySchema>;
+
+export type InsertCategory = typeof categories.$inferInsert;
 
 // export const categoriesRelations = relations(categories, ({ one, many }) => ({
 //   father: one(categories, {
