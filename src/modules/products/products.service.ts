@@ -10,8 +10,8 @@ export class ProductsService {
     return await this.productsRepository.createProduct(body);
   }
 
-  async findAll() {
-    return await this.productsRepository.findAllProducts();
+  async findAll({page, limit}:{page:number, limit:number}) {
+    return await this.productsRepository.findAllProducts({page, limit})
   }
 
   async findOne(id: string) {

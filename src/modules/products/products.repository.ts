@@ -9,16 +9,22 @@ import { InsertProduct, products } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 
 @Injectable()
-export class ProductsRepository { 
+export class ProductsRepository {
   constructor() {}
 
-  async findAllProducts(): Promise<
-    Omit<InsertProduct, 'description' | 'categoryId' | 'stock'>[]
-  > {
+  async findAllProducts({
+    page,
+    limit,
+  }: {
+    page: number;
+    limit: number;
+  }): Promise<Omit<InsertProduct, 'description' | 'categoryId' | 'stock'>[]> {
     const products = await db.query.products.findMany({
       with: { category: { columns: { name: true } } },
       where: (products: any, { gt }: any) => gt(products.stock, 1),
       columns: { categoryId: false, description: false, stock: false },
+      limit:limit,
+      offset: (page - 1) * limit
     });
     if (products.length === 0)
       throw new NotFoundException('Products Not Found');
