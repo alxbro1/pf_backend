@@ -1,4 +1,4 @@
-import { isNotNull, relations } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import {
   integer,
@@ -9,6 +9,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
+
 
 // export const roleEnum = pgEnum('role_enum', [
 //   'CUSTOMER',
@@ -101,7 +102,7 @@ export const productInsertSchema = createInsertSchema(products, {
   description: (schema) => schema.description.max(255),
   type: (schema) => schema.type,
   stock: (schema) => schema.stock,
-  categoryId: (schema) => schema.categoryId,
+  categoryId: (schema) => schema.categoryId.uuid("ID must be UUID"),
 });
 export type InsertProduct = typeof products.$inferInsert;
 

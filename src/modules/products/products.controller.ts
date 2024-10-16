@@ -7,19 +7,21 @@ import {
   Param,
   Delete,
   BadRequestException,
+  ParseUUIDPipe,
+  Put,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { InsertProduct, productInsertSchema } from '../../db/schema';
+import { InsertProduct, productInsertSchema } from '../../../db/schema';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()
+  @Post('createproduct')
   async create(@Body() body: InsertProduct) {
     const validation = productInsertSchema.safeParse(body);
     if (!validation.success) {
-      throw new BadRequestException(validation.error);
+      throw new BadRequestException(validation.error.issues);
     }
     return await this.productsService.create(validation.data as InsertProduct);
   }
@@ -30,17 +32,20 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.productsService.findOne(id);
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() body: Partial<InsertProduct>) {
+  @Put(':id')
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: Partial<InsertProduct>,
+  ) {
     return await this.productsService.update(id, body);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     return await this.productsService.remove(id);
   }
 }
