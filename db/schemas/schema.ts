@@ -39,6 +39,14 @@ export const users = pgTable('user', {
 const insertUserSchema = createInsertSchema(users);
 export type CreateUserDto = z.infer<typeof insertUserSchema>;
 
+const selectUserSchema = createSelectSchema(users).pick({
+  id: true,
+  name: true,
+  email: true,
+  image: true,
+});
+export type SelectUserDto = z.infer<typeof selectUserSchema>;
+
 export const accounts = pgTable(
   'account',
   {
@@ -268,7 +276,7 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 //   product: one(products,{fields:[images.productId], references:[products.id]})
 // }))
 
-export * from './auth.schema'
-export * from './products.schema'
-export * from './categories.schema'
-export * from './users.schema'
+export * from './auth.schema';
+export * from './products.schema';
+export * from './categories.schema';
+export * from './users.schema';

@@ -57,7 +57,7 @@ export class ProductsRepository {
         limit: limit,
         offset: (page - 1) * limit,
       })
-      .catch((err) => {
+      .catch(() => {
         throw new BadRequestException(
           'There are no products available for this category',
         );
