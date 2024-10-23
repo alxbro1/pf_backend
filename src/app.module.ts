@@ -23,10 +23,8 @@ import { CartsModule } from './modules/carts/carts.module';
     MailModule,
     AuthModule,
     MercadopagoModule,
-    MailModule,
-    AuthModule,
-    WebsocketModule,
-    CartsModule
+    CartsModule,
+    WebsocketModule
   ],
 })
 export class AppModule {}
