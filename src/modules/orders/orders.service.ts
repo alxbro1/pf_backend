@@ -10,4 +10,12 @@ export class OrdersService {
   async create(createOrderDto: CreateOrderDto) {
     return await this.ordersRepository.create(createOrderDto);
   }
+
+  async updateToPayment(updateOrderDto: any) {
+    const dbResponse = await this.ordersRepository.updateToPayment(updateOrderDto)
+    if(!dbResponse) throw new Error("Error updating order")
+    return dbResponse
+  }
+
+  
 }

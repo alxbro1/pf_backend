@@ -2,6 +2,7 @@ import { BadGatewayException, BadRequestException, Injectable } from "@nestjs/co
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { db } from "../../config/db";
 import { orders, ordersDetails } from "../../../db/schemas/orders.schema";
+import { eq } from "drizzle-orm";
 
 @Injectable()
 export class ordersRepository {
@@ -25,5 +26,15 @@ export class ordersRepository {
         }
 
         return order[0].id
+    }
+
+    async updateToPayment(data: any){
+        console.log(data)
+        const dbResponse = await db.update(orders)
+          .set({ mpOrderId: data.mpOrder, isPaid: data.paid,  orderEstatus: data.status})
+          .where(eq(orders.id, data.order))
+          .execute();
+          console.log(dbResponse)
+        return dbResponse;
     }
 }

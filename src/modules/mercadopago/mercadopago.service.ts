@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { mpClient } from '../../config/mercadopago.config';
-import { Payment, Preference, MerchantOrder } from 'mercadopago';
+import { Payment, Preference, MerchantOrder, PaymentRefund } from 'mercadopago';
 import { HOST } from '../../config/enviroments.config';
 import { db } from '../../config/db';
 import { eq, inArray } from 'drizzle-orm';
@@ -24,8 +24,10 @@ export class MercadopagoService {
       if (!user || !user.id) {
         throw new BadRequestException('User not found');
       }
-      const productsArr = await this.productsService.findManyByIds(body.products.map(({id}) => id))
-      
+      const productsArr = await this.productsService.findManyByIds(
+        body.products.map(({ id }) => id),
+      );
+
       const productsForPreference = productsArr.map((product) => {
         const prodReq = body.products.find(({ id }) => id === product.id);
         if (!prodReq) {
@@ -99,10 +101,69 @@ export class MercadopagoService {
   async webhook(body: any) {
     if (body.data) {
       const payment: any = await new Payment(mpClient).get(body.data);
-      if (payment.order.id) {
-        const metadata = payment.metadata;
-        const products = payment.additional_info.items;
-        console.log(products);
+      console.log(payment.id);
+      const products = payment.additional_info.items;
+      const metadata = payment.metadata;
+      if (payment.status == 'approved') {
+        const productsData = await this.productsService.findManyByIds(
+          products.map((product: { id: any }) => product.id),
+        );
+
+        products.forEach(async (product: { id: any; quantity: any }) => {
+          const productDb = productsData.find((prod) => prod.id === product.id);
+          if (!productDb || productDb.stock < product.quantity) {
+            try {
+              await new PaymentRefund(mpClient).create({
+                payment_id: payment.id,
+                body: {},
+              });
+
+              const updatePaymentObject = {
+                mpOrder: payment.order.id,
+                paid: false,
+                status: 'refound',
+                order: metadata.order_id,
+              };
+
+              await this.ordersService.updateToPayment(updatePaymentObject);
+
+              throw new BadRequestException('Stock insuficient');
+            } catch (error) {}
+          }
+        });
+
+        products.forEach(async (product: { id: any; quantity: any }) => {
+          const productDb = productsData.find((prod) => prod.id === product.id);
+          if (productDb) {
+            await this.productsService.updateStock(
+              -product.quantity,
+              product.id,
+            );
+          }
+        });
+
+        const updatePaymentObject = {
+          mpOrder: payment.order.id,
+          paid: true,
+          status: 'paid',
+          order: metadata.order_id,
+        };
+
+        const dbResponse = await this.ordersService.updateToPayment(updatePaymentObject);
+
+        return dbResponse;
+      }
+
+      if (payment.status === 'rejected') {
+        console.log('fallo el pago')
+        const updatePaymentObject = {
+          mpOrder: payment.order.id,
+          paid: false,
+          status: 'cancelled',
+          order: metadata.order_id,
+        };
+
+        return await this.ordersService.updateToPayment(updatePaymentObject);
       }
     }
   }

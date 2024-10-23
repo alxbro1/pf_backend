@@ -9,7 +9,7 @@ import {
   ProductEntity,
   products,
 } from '../../../db/schemas/schema';
-import { eq, and, gte, inArray, gt } from 'drizzle-orm';
+import { eq, and, gte, inArray, gt, sql } from 'drizzle-orm';
 import { FilesService } from '../files/files.service';
 
 @Injectable()
@@ -163,6 +163,16 @@ export class ProductsRepository {
     if (updateProduct.length == 0)
       throw new NotFoundException('Product ID Not Found');
     return updateProduct;
+  }
+
+  async updateStock(count:number, productId:string){
+    const result = await db
+      .update(products)
+      .set({
+        stock: sql`${products.stock}  + ${count}`,
+      })
+      .where(eq(products.id, productId))
+      .returning();
   }
 
   async removeProduct(id: string): Promise<{ message: string }> {

@@ -14,7 +14,10 @@ export class ProductsService {
     limit++;
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
-    const data = await this.productsRepository.findAllProducts({ cursor, limit });
+    const data = await this.productsRepository.findAllProducts({
+      cursor,
+      limit,
+    });
     cursor = data[limit - 1]?.id;
     data.pop();
     return {
@@ -66,6 +69,10 @@ export class ProductsService {
 
   async update(id: string, productData: Partial<InsertProduct>) {
     return await this.productsRepository.updateProduct(id, productData);
+  }
+
+  async updateStock(count: number, id: string) {
+    return await this.productsRepository.updateStock(count, id);
   }
 
   async remove(id: string) {

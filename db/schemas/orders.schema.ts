@@ -4,7 +4,6 @@ import {
   pgEnum,
   pgTable,
   varchar,
-  uuid,
   boolean,
   text
 } from 'drizzle-orm/pg-core';
@@ -16,6 +15,7 @@ export const orderStatusEnum = pgEnum('order_status', [
   'pending',
   'paid',
   'cancelled',
+  'refound',
 ]);
 
 export const orders = pgTable('orders', {
