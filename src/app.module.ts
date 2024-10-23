@@ -10,6 +10,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { MercadopagoModule } from './modules/mercadopago/mercadopago.module';
 import { WebsocketModule } from './modules/websockets/websockets.module';
 import { CartsModule } from './modules/carts/carts.module';
+import { WebsocketModule } from './modules/websockets/websockets.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CartsModule } from './modules/carts/carts.module';
     AuthModule,
     WebsocketModule,
     CartsModule,
+    WebsocketModule
   ],
 })
 export class AppModule {}
