@@ -8,6 +8,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
 import { MercadopagoModule } from './modules/mercadopago/mercadopago.module';
+import { WebsocketModule } from './modules/websockets/websockets.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { MercadopagoModule } from './modules/mercadopago/mercadopago.module';
     MercadopagoModule,
     MailModule,
     AuthModule,
+    WebsocketModule,
   ],
 })
 export class AppModule {}
