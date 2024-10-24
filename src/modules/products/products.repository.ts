@@ -9,31 +9,31 @@ import {
   ProductEntity,
   products,
 } from '../../../db/schemas/schema';
-import { eq, and, gte, inArray, gt, sql } from 'drizzle-orm';
+import { eq, and, gte, inArray, gt, sql, asc } from 'drizzle-orm';
 import { FilesService } from '../files/files.service';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class ProductsRepository {
   constructor(private readonly filesService: FilesService) {}
 
-  async findAllProducts({
-    cursor,
-    limit,
-  }: {
-    cursor: string;
-    limit: number;
-  }): Promise<
-    | Omit<
-        ProductEntity,
-        'description' | 'categoryId' | 'stock' | 'active' | 'type'
-      >[]
-    | []
-  > {
-    const products = await db.query.products
+  async findAllProducts({ cursor, limit }: PaginationDto): Promise<{
+    products:
+      | Omit<
+          ProductEntity,
+          'description' | 'categoryId' | 'stock' | 'active' | 'type'
+        >[]
+      | [];
+    nextCursor: string | undefined;
+  }> {
+    const selectedProducts = await db.query.products
       .findMany({
         with: { category: { columns: { name: true } } },
-        where: (products, { eq, and }: any) =>
-          and(gte(products.stock, 1), eq(products.active, true), gte(products.id, cursor)),
+        where: and(
+          gte(products.stock, 1),
+          eq(products.active, true),
+          cursor ? gte(products.id, cursor) : undefined,
+        ),
         columns: {
           categoryId: false,
           description: false,
@@ -41,13 +41,29 @@ export class ProductsRepository {
           active: false,
           type: false,
         },
-        limit: limit,
+        limit: limit + 1,
+        orderBy: asc(products.id),
       })
       .catch((err) => {
         throw new BadRequestException('There are no more products available');
       });
-    if (products.length === 0) return [];
-    return products;
+
+    let nextCursor: string | undefined = undefined;
+
+    if (selectedProducts.length === 0)
+      return {
+        products: [],
+        nextCursor,
+      };
+
+    if (selectedProducts.length > limit) {
+      nextCursor = selectedProducts.pop()?.id;
+    }
+
+    return {
+      products: selectedProducts,
+      nextCursor,
+    };
   }
 
   async findAllDashboardProducts({
@@ -56,7 +72,7 @@ export class ProductsRepository {
   }: {
     limit: number;
     cursor: string;
-  }) : Promise<Omit<ProductEntity, 'description' | 'categoryId' >[]> {
+  }): Promise<Omit<ProductEntity, 'description' | 'categoryId'>[]> {
     const data = db.query.products.findMany({
       columns: {
         imageUrl: true,
@@ -90,7 +106,7 @@ export class ProductsRepository {
           gt(products.stock, 1),
           eq(products.active, true),
           eq(products.categoryId, category),
-          gte(products.id, cursor)
+          gte(products.id, cursor),
         ),
         columns: { categoryId: false, description: false, stock: false },
         limit: limit,
@@ -165,7 +181,7 @@ export class ProductsRepository {
     return updateProduct;
   }
 
-  async updateStock(count:number, productId:string){
+  async updateStock(count: number, productId: string) {
     const result = await db
       .update(products)
       .set({

@@ -26,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RemoveOneImageDto } from './dto/remove.dto';
+import { paginationDto } from './dto/pagination.dto';
 
 @Controller('products')
 @ApiTags('Products')
@@ -186,9 +187,14 @@ export class ProductsController {
   })
   @ApiOperation({ summary: 'Get All Paginated Products (Page/Limit)' })
   async findAll(
-    @Query('cursor') cursor: string,
-    @Query('limit', LimitPipe) limit: number,
+    @Query('cursor') queryCursor: string,
+    @Query('limit', LimitPipe) queryLimit: number,
   ) {
+    const { cursor, limit } = paginationDto.parse({
+      cursor: queryCursor,
+      limit: queryLimit,
+    });
+
     return await this.productsService.findAll({ cursor, limit });
   }
 
@@ -197,9 +203,11 @@ export class ProductsController {
     @Query('limit', ParseIntPipe) limit: number,
     @Query('cursor') cursor: string,
   ) {
-    return await this.productsService.findAllDashboardProducts({ limit, cursor });
+    return await this.productsService.findAllDashboardProducts({
+      limit,
+      cursor,
+    });
   }
-  
 
   @Get('category')
   @ApiResponse({
@@ -298,7 +306,11 @@ export class ProductsController {
     @Query('cursor', ParseIntPipe) cursor: string,
     @Query('limit', LimitPipe) limit: number,
   ) {
-    return await this.productsService.findByCategory({ category, cursor, limit });
+    return await this.productsService.findByCategory({
+      category,
+      cursor,
+      limit,
+    });
   }
 
   @Get(':id')

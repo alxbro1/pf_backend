@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { InsertProduct, ProductEntity } from '../../../db/schemas/schema';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class ProductsService {
@@ -10,20 +11,11 @@ export class ProductsService {
     return await this.productsRepository.createProduct(body);
   }
 
-  async findAll({ cursor, limit }: { cursor: string; limit: number }) {
-    limit++;
-    if (!cursor) cursor = '0';
-    if (!limit || limit > 20) limit = 20;
-    const data = await this.productsRepository.findAllProducts({
+  findAll({ cursor, limit }: PaginationDto) {
+    return this.productsRepository.findAllProducts({
       cursor,
       limit,
     });
-    cursor = data[limit - 1]?.id;
-    data.pop();
-    return {
-      data,
-      cursor,
-    };
   }
 
   async findAllDashboardProducts({
