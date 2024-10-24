@@ -12,31 +12,30 @@ import { db } from '../../config/db';
 export class AuthService {
   async register(registerDto: RegisterDto) {
     const { password, ...rest } = registerDto;
-    const hashedPassword = await hash(password, 15);
+    const hashedPassword = await hash(password, 10);
 
-    return db.insert(users).values([
+    await db.insert(users).values([
       {
         ...rest,
         password: hashedPassword,
       },
     ]);
+
+    return;
   }
 
   async login(loginDto: LoginDto): Promise<SelectUserDto> {
     // const selectedUsers = await db
     //   .select()
     //   .from(users)
-    //   .where(
-    //     and(
-    //       eq(users.email, loginDto.email),
-    //       eq(users.password, loginDto.password),
-    //     ),
-    //   )
+    //   .where(eq(users.email, loginDto.email))
     //   .limit(1);
 
     // if (selectedUsers.length === 0) {
     //   throw new Error('User not exists');
     // }
+
+    // const userFound = selectedUsers[0];
 
     // return selectedUsers[0];
 
@@ -55,9 +54,6 @@ export class AuthService {
       throw new Error('User not exists');
     }
 
-    // if (userFound.password === null) {
-    //   // Manejar en caso de que se use una autentication de terceros que no use contrasena.
-    // } else {
     const valid = await compare(loginDto.password, userFound.password!);
 
     if (valid === false) {
@@ -67,6 +63,5 @@ export class AuthService {
     const { password, ...userRest } = userFound;
 
     return userRest;
-    // }
   }
 }

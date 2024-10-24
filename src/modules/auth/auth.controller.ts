@@ -10,14 +10,12 @@ export class AuthController {
 
   @Post('/register')
   register(@Body() registerDto: RegisterDto) {
-    console.log(registerDto);
     return this.authService.register(registerDto);
   }
 
   @Post('/login')
   @HttpCode(200)
   login(@Body() loginDto: LoginDto) {
-    console.log(loginDto);
     return this.authService.login(loginDto);
   }
 }

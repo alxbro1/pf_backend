@@ -1,8 +1,9 @@
 import { relations } from 'drizzle-orm';
-import { boolean } from 'drizzle-orm/pg-core';
-import { text } from 'drizzle-orm/pg-core';
-import { primaryKey } from 'drizzle-orm/pg-core';
+import { uniqueIndex } from 'drizzle-orm/pg-core';
 import {
+  boolean,
+  text,
+  primaryKey,
   integer,
   pgEnum,
   pgTable,
@@ -24,17 +25,25 @@ export const productTypeEnum = pgEnum('type_product_enum', [
   'PHISICAL',
 ]);
 
-export const users = pgTable('user', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text('name'),
-  email: text('email').unique().notNull(),
-  emailVerified: timestamp('emailVerified', { mode: 'date' }),
-  password: text('password'),
-  image: text('image').default('default_profile_picture.png').notNull(),
-  active: boolean().default(true).notNull(),
-});
+export const users = pgTable(
+  'user',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text('name'),
+    email: text('email').unique().notNull(),
+    emailVerified: timestamp('emailVerified', { mode: 'date' }),
+    password: text('password'),
+    image: text('image').default('default_profile_picture.png').notNull(),
+    active: boolean().default(true).notNull(),
+  },
+  (table) => {
+    return {
+      emailIdx: uniqueIndex('email_idx').on(table.email),
+    };
+  },
+);
 
 const insertUserSchema = createInsertSchema(users);
 export type CreateUserDto = z.infer<typeof insertUserSchema>;
