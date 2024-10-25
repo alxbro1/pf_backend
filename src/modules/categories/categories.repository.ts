@@ -13,11 +13,8 @@ export class CategoriesRepository {
 
   async findAll(): Promise<InsertCategory[]> {
     try {
-      const categories = await db.query.categories.findMany({
-        with: { products: true },
-      });
-      if (categories.length == 0)
-        throw new NotFoundException('Categories not Found');
+      const categories = await db.query.categories.findMany();
+      if (categories.length == 0) return []
       return categories;
     } catch {
       throw new InternalServerErrorException('Error fetching Categories');
@@ -41,7 +38,6 @@ export class CategoriesRepository {
       .values(newCategoryData)
       .returning();
     if (!newCategory) throw new BadRequestException("Error Creating Category");
-
 
     return newCategory;
   }

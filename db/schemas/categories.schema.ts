@@ -12,7 +12,7 @@ export const categories = pgTable('categories', {
     .notNull()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: varchar({ length: 50 }).notNull(),
+  name: varchar({ length: 50 }).notNull().unique(),
 });
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
