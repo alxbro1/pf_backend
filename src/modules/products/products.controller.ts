@@ -13,6 +13,7 @@ import {
   Patch,
   UseInterceptors,
 } from '@nestjs/common';
+
 import { ProductsService } from './products.service';
 import { InsertProduct, productInsertSchema } from '../../../db/schemas/schema';
 import { LimitPipe } from './pipes/limitPage.pipe';
@@ -33,7 +34,7 @@ import { paginationDto } from './dto/pagination.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post('createproduct')
+  @Post('create')
   @ApiBody({
     description: 'Request body for creating a Category',
     required: true,
@@ -44,7 +45,7 @@ export class ProductsController {
           name: 'Prueba producto',
           price: 1999,
           description: 'Prueba descripcion',
-          type: 'DIGITAL',
+          type: 'digital',
           stock: 25,
           imageUrl: 'imagen prueba',
           categoryId: 'c65397d5-6f4e-4173-bc16-6861585e0db6',
@@ -62,7 +63,7 @@ export class ProductsController {
             id: '53c08a82-b37f-413c-8cfe-6a2ef697e82a',
             price: 1999,
             description: 'Prueba descripcion',
-            type: 'DIGITAL',
+            type: 'digital',
             stock: 25,
             name: 'Prueba producto',
             categoryId: 'c65397d5-6f4e-4173-bc16-6861585e0db6',
@@ -104,7 +105,7 @@ export class ProductsController {
           {
             id: '9e8f808f-4dc3-4cce-ab3b-ee7d0f59396e',
             price: 182,
-            type: 'DIGITAL',
+            type: 'digital',
             name: 'that morning',
             imageUrl: 'https://loremflickr.com/900/900?lock=2327064722111630',
             active: true,
@@ -126,7 +127,7 @@ export class ProductsController {
           {
             id: '82619689-2657-4e50-8960-0f3edf1931f4',
             price: 320,
-            type: 'DIGITAL',
+            type: 'digital',
             name: 'precious packaging',
             imageUrl: 'https://loremflickr.com/900/900?lock=4483356518871534',
             active: true,
@@ -187,14 +188,9 @@ export class ProductsController {
   })
   @ApiOperation({ summary: 'Get All Paginated Products (Page/Limit)' })
   async findAll(
-    @Query('cursor') queryCursor: string,
-    @Query('limit', LimitPipe) queryLimit: number,
+    @Query('cursor') cursor: string,
+    @Query('limit', LimitPipe) limit: number,
   ) {
-    const { cursor, limit } = paginationDto.parse({
-      cursor: queryCursor,
-      limit: queryLimit,
-    });
-
     return await this.productsService.findAll({ cursor, limit });
   }
 
@@ -230,7 +226,7 @@ export class ProductsController {
           {
             id: '9cf0e360-7cc8-4529-913f-bca60f79c85f',
             price: 519,
-            type: 'DIGITAL',
+            type: 'digital',
             name: 'mad pleasure',
             imageUrl: 'https://loremflickr.com/900/900?lock=1807641517456240',
             active: true,
@@ -241,7 +237,7 @@ export class ProductsController {
           {
             id: '08dcb356-041e-4d02-9810-3b645bb8bd07',
             price: 588,
-            type: 'DIGITAL',
+            type: 'digital',
             name: 'difficult arcade',
             imageUrl: 'https://loremflickr.com/900/900?lock=1368951004200504',
             active: true,
@@ -252,7 +248,7 @@ export class ProductsController {
           {
             id: 'ef2298f0-378e-419a-b1e6-c0fcb751debe',
             price: 10,
-            type: 'DIGITAL',
+            type: 'digital',
             name: 'excited alb',
             imageUrl: 'https://loremflickr.com/900/900?lock=7193111634341298',
             active: true,
@@ -323,7 +319,7 @@ export class ProductsController {
           id: '98a00aa3-b9b2-4a06-9571-aa749ae7fe4d',
           price: 435,
           description: 'Vestrum abeo alias adflicto vir alienus vado.',
-          type: 'DIGITAL',
+          type: 'digital',
           stock: 29,
           name: 'monumental cafe',
           categoryId: '3559389f-22f3-4e32-b94b-31a068f8a383',
@@ -377,7 +373,7 @@ export class ProductsController {
             id: '98a00aa3-b9b2-4a06-9571-aa749ae7fe4d',
             price: 435,
             description: 'Example Description',
-            type: 'DIGITAL',
+            type: 'digital',
             stock: 29,
             name: 'Example Name',
             categoryId: '3559389f-22f3-4e32-b94b-31a068f8a383',

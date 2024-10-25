@@ -68,7 +68,7 @@ export class CategoriesController {
                 price: 904,
                 description:
                   'Repellendus vehemens defaeco accommodo somniculosus conventus recusandae.',
-                type: 'DIGITAL',
+                type: 'digital',
                 stock: 54,
                 name: 'avaricious luck',
                 categoryId: 'b2498ca4-fae1-4091-93c5-db39007fef35',
@@ -100,7 +100,7 @@ export class CategoriesController {
                 price: 519,
                 description:
                   'Ventosus adversus dolor appono demulceo crepusculum currus defero.',
-                type: 'DIGITAL',
+                type: 'digital',
                 stock: 49,
                 name: 'mad pleasure',
                 categoryId: '21a270d5-d0a0-4051-8a3e-a0df75f871c0',
@@ -113,7 +113,7 @@ export class CategoriesController {
                 price: 588,
                 description:
                   'Tabesco allatus votum concedo cresco terreo vesco amplitudo eligendi.',
-                type: 'DIGITAL',
+                type: 'digital',
                 stock: 57,
                 name: 'difficult arcade',
                 categoryId: '21a270d5-d0a0-4051-8a3e-a0df75f871c0',
@@ -126,7 +126,7 @@ export class CategoriesController {
                 price: 10,
                 description:
                   'Aequitas candidus avarus veritatis arcesso uter usus textor.',
-                type: 'DIGITAL',
+                type: 'digital',
                 stock: 31,
                 name: 'excited alb',
                 categoryId: '21a270d5-d0a0-4051-8a3e-a0df75f871c0',
@@ -151,7 +151,7 @@ export class CategoriesController {
                 price: 25,
                 description:
                   'Quas curiositas apostolus baiulus claudeo atqui comparo.',
-                type: 'DIGITAL',
+                type: 'digital',
                 stock: 48,
                 name: 'brilliant illusion',
                 categoryId: '21a270d5-d0a0-4051-8a3e-a0df75f871c0',

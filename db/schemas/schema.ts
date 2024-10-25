@@ -21,8 +21,8 @@ import { z } from 'zod';
 // ]);
 
 export const productTypeEnum = pgEnum('type_product_enum', [
-  'DIGITAL',
-  'PHISICAL',
+  'digital',
+  'physical',
 ]);
 
 export const users = pgTable(
@@ -227,8 +227,13 @@ export const categories = pgTable('categories', {
     .notNull()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: varchar({ length: 50 }).notNull(),
+  name: varchar({ length: 50 }).unique().notNull(),
 });
+
+export const selectCategoriesSchema = createSelectSchema(categories).pick({
+  name: true,
+});
+export type Categories = z.infer<typeof selectCategoriesSchema>;
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   products: many(products),
