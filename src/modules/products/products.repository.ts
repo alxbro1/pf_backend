@@ -11,28 +11,26 @@ import {
 } from '../../../db/schemas/schema';
 import { eq, and, gte, inArray, gt, sql, asc } from 'drizzle-orm';
 import { FilesService } from '../files/files.service';
-import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class ProductsRepository {
   constructor(private readonly filesService: FilesService) {}
 
-  async findAllProducts({ cursor, limit }: PaginationDto): Promise<{
-    products:
-      | Omit<
+  async findAllProducts(
+    cursor: string,
+    limit: number,
+  ): Promise<Omit<
           ProductEntity,
           'description' | 'categoryId' | 'stock' | 'active' | 'type'
         >[]
-      | [];
-    nextCursor: string | undefined;
-  }> {
-    const selectedProducts = await db.query.products
+      | []> {
+    return await db.query.products
       .findMany({
         with: { category: { columns: { name: true } } },
         where: and(
           gte(products.stock, 1),
           eq(products.active, true),
-          cursor ? gte(products.id, cursor) : undefined,
+          gte(products.id, cursor),
         ),
         columns: {
           categoryId: false,
@@ -47,23 +45,6 @@ export class ProductsRepository {
       .catch((err) => {
         throw new BadRequestException('There are no more products available');
       });
-
-    let nextCursor: string | undefined = undefined;
-
-    if (selectedProducts.length === 0)
-      return {
-        products: [],
-        nextCursor,
-      };
-
-    if (selectedProducts.length > limit) {
-      nextCursor = selectedProducts.pop()?.id;
-    }
-
-    return {
-      products: selectedProducts,
-      nextCursor,
-    };
   }
 
   async findAllDashboardProducts({

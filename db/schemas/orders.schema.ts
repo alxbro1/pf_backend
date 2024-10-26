@@ -24,6 +24,7 @@ export const orders = pgTable('orders', {
   userId: text().references(() => users.id),
   orderEstatus: orderStatusEnum('order_status').default('pending'),
   isPaid: boolean('is_paid').default(false),
+  amount: integer('amount').notNull(),
   createdAt: varchar('created_at', { length: 256 }).default(
     new Date().toISOString(),
   ),

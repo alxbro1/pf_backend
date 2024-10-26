@@ -28,6 +28,8 @@ export class MercadopagoService {
         body.products.map(({ id }) => id),
       );
 
+      let amount = 0
+
       const productsForPreference = productsArr.map((product) => {
         const prodReq = body.products.find(({ id }) => id === product.id);
         if (!prodReq) {
@@ -50,6 +52,7 @@ export class MercadopagoService {
             `Product by id equal ${product.id} out of stock`,
           );
         }
+        amount += product.price * prodReq.quantity
         return {
           id: product.id,
           title: product.name,
@@ -73,6 +76,7 @@ export class MercadopagoService {
       const orderId = await this.ordersService.create({
         userId: user.id,
         products: productForOrder,
+        amount
       });
 
       const orderBody = {
@@ -92,7 +96,7 @@ export class MercadopagoService {
       };
 
       const preference = await new Preference(mpClient).create(orderBody);
-      return preference;
+      return { url: preference };
     } catch (error) {
       console.log(error);
     }

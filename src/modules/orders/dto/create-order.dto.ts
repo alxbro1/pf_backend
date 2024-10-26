@@ -20,4 +20,6 @@ export class CreateOrderDto {
   mpOrderID?: string;
 
   products: products[];
+
+  amount: number;
 }

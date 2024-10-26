@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { InsertProduct, ProductEntity } from '../../../db/schemas/schema';
-import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class ProductsService {
@@ -11,11 +10,28 @@ export class ProductsService {
     return await this.productsRepository.createProduct(body);
   }
 
-  findAll({ cursor, limit }: PaginationDto) {
-    return this.productsRepository.findAllProducts({
-      cursor,
-      limit,
-    });
+  async findAll(cursor: string | undefined | null, limit: number) {
+    limit++;
+    if (!cursor) cursor = '0';
+    if (!limit || limit > 20) limit = 20;
+
+    const data = await this.productsRepository.findAllProducts(cursor, limit);
+
+     const prevCursor = cursor ? +cursor : null;
+
+     if (!data[limit - 1]?.id) {
+       cursor = null;
+     } else {
+       cursor = data[limit - 1].id;
+     }
+
+     cursor;
+     data.splice(limit, 1);
+     return {
+       data,
+       cursor: cursor,
+       prevCursor: prevCursor,
+     };
   }
 
   async findAllDashboardProducts({
@@ -23,7 +39,7 @@ export class ProductsService {
     cursor,
   }: {
     limit: number;
-    cursor: string;
+    cursor: string | undefined | null;
   }) {
     limit++;
     if (!cursor) cursor = '0';
@@ -37,14 +53,56 @@ export class ProductsService {
       .catch((err) => {
         throw new BadRequestException('There are no more products available');
       });
-    if (data.length === 0) return { data: [], cursor: null };
-    cursor = data[limit - 1]?.id;
-    data.pop();
-    const returnObject = {
-      data: data,
-      cursor,
+    const prevCursor = cursor ? +cursor : null;
+
+    if (!data[limit - 1]?.id) {
+      cursor = null;
+    } else {
+      cursor = data[limit - 1].id;
+    }
+
+    cursor;
+    data.splice(limit, 1);
+    return {
+      data,
+      cursor: cursor,
+      prevCursor: prevCursor,
     };
-    return returnObject;
+  }
+
+  async findByCategory({
+    category,
+    cursor,
+    limit,
+  }: {
+    category: string;
+    cursor: string | null | undefined;
+    limit: number;
+  }) {
+    limit++;
+    if (!cursor) cursor = '0';
+    if (!limit || limit > 20) limit = 20;
+    const data = await this.productsRepository.findProductsByCategory({
+      category,
+      cursor,
+      limit,
+    });
+
+    const prevCursor = cursor ? +cursor : null;
+
+    if (!data[limit - 1]?.id) {
+      cursor = null;
+    } else {
+      cursor = data[limit - 1].id;
+    }
+
+    cursor;
+    data.splice(limit, 1);
+    return {
+      data,
+      cursor: cursor,
+      prevCursor: prevCursor,
+    };
   }
 
   async findOne(id: string) {
@@ -69,39 +127,6 @@ export class ProductsService {
 
   async remove(id: string) {
     return await this.productsRepository.removeProduct(id);
-  }
-
-  async findByCategory({
-    category,
-    cursor,
-    limit,
-  }: {
-    category: string;
-    cursor: string | null | undefined;
-    limit: number;
-  }) {
-    limit++;
-    if (!cursor) cursor = '0';
-    if (!limit || limit > 20) limit = 20;
-    const data = await this.productsRepository.findProductsByCategory({
-      category,
-      cursor,
-      limit,
-    });
-
-    if (!data[limit - 1]?.id) {
-      cursor = null;
-    } else {
-      cursor = data[limit - 1].id;
-    }
-
-    cursor;
-    data.splice(limit, 1);
-    console.log(cursor);
-    return {
-      data,
-      cursor: cursor,
-    };
   }
 
   async updateProductImage(productId: string, file: Express.Multer.File) {

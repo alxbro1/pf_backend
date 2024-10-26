@@ -191,7 +191,7 @@ export class ProductsController {
     @Query('cursor') cursor: string,
     @Query('limit', LimitPipe) limit: number,
   ) {
-    return await this.productsService.findAll({ cursor, limit });
+    return await this.productsService.findAll( cursor, limit );
   }
 
   @Get('dashboardTable')
