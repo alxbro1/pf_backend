@@ -96,9 +96,10 @@ export class ProductsRepository {
     limit,
   }: {
     category: string;
-    cursor: string;
+    cursor: string ;
     limit: number;
   }): Promise<Omit<InsertProduct, 'description' | 'categoryId' | 'stock'>[]> {
+    console.log(cursor)
     const productsArr = await db.query.products
       .findMany({
         with: { category: { columns: { name: true } } },

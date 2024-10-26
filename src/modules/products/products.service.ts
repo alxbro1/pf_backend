@@ -77,7 +77,7 @@ export class ProductsService {
     limit,
   }: {
     category: string;
-    cursor: string | undefined;
+    cursor: string | null | undefined;
     limit: number;
   }) {
     limit++;
@@ -88,8 +88,16 @@ export class ProductsService {
       cursor,
       limit,
     });
-    cursor = data[limit - 1]?.id;
-    data.pop();
+
+    if (!data[limit - 1]?.id) {
+      cursor = null;
+    } else {
+      cursor = data[limit - 1].id;
+    }
+
+    cursor;
+    data.splice(limit, 1);
+    console.log(cursor);
     return {
       data,
       cursor: cursor,
