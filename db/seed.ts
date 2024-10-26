@@ -9,6 +9,8 @@ import {
   type Categories,
 } from './schemas/schema';
 
+import { IgamesObjects, gamesArray, categoriesArray, IgamesObjectsForDb } from './gamesArray.objects';
+
 const main = async () => {
   const categoriesData: Set<string> = new Set();
 
@@ -29,7 +31,7 @@ const main = async () => {
   const resultCategories = await db
     .insert(categories)
     .values(categoriesArray)
-    .returning({ id: users.id });
+    .returning({ id: categories.id });
 
   for (let i = 0; i < 50; i++) {
     productsData.push({
@@ -58,4 +60,28 @@ const main = async () => {
   /* await db.$client.end(); */
 };
 
-main();
+const elMain = async() =>{
+
+  const resultCategories = await db
+    .insert(categories)
+    .values(categoriesArray)
+    .returning();
+
+  const gamesObjects = gamesArray.map((object: IgamesObjects) => {
+    return {
+      name: object.name,
+      price: object.price,
+      description: object.description,
+      type: 'digital',
+      stock: object.stock,
+      categoryId: resultCategories.find(
+        (categorie) => categorie.name == object.category.toLowerCase(),
+      )?.id,
+      imageUrl: object.imageUrl,
+    };
+  }) as IgamesObjectsForDb[];
+
+  await db.insert(products).values(gamesObjects);
+}
+
+elMain();

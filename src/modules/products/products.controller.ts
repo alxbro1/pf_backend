@@ -299,7 +299,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get All Products By Category' })
   async findByCategory(
     @Query('category') category: string,
-    @Query('cursor', ParseIntPipe) cursor: string,
+    @Query('cursor') cursor: string,
     @Query('limit', LimitPipe) limit: number,
   ) {
     return await this.productsService.findByCategory({
