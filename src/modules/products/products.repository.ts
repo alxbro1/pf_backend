@@ -28,25 +28,20 @@ export class ProductsRepository {
       >[]
     | []
   > {
-    let where
+    let where = [
+      gte(products.stock, 1),
+      eq(products.active, true),
+      gte(products.id, cursor),
+    ];
+
     if (typeProduct == typeEnum.physical || typeProduct == typeEnum.digital) {
-      where = and(
-        gte(products.stock, 1),
-        eq(products.active, true),
-        gte(products.id, cursor),
-        eq(products.type, typeProduct),
-      );
-    } else {
-      where = and(
-        gte(products.stock, 1),
-        eq(products.active, true),
-        gte(products.id, cursor),
-      );
+      where.push(eq(products.type, typeProduct));
     }
+    
     return await db.query.products
       .findMany({
         with: { category: { columns: { name: true } } },
-        where,
+        where: and(...where),
         columns: {
           categoryId: false,
           description: false,

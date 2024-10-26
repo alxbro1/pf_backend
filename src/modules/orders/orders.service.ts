@@ -19,6 +19,7 @@ export class OrdersService {
 
   async findAll(cursor: number | null, limit: number, userId: string) {
     limit++;
+    const prevCursor = cursor ? +cursor : null;
     if (!cursor) cursor = 0;
     if (!limit || limit > 20) limit = 20;
 
@@ -28,7 +29,6 @@ export class OrdersService {
       limit,
     );
 
-    const prevCursor = cursor ? +cursor : null;
 
     if (!data[limit - 1]?.id) {
       cursor = null;
@@ -52,12 +52,12 @@ export class OrdersService {
 
   async findAllAdmin(cursor: number | null, limit: number) {
     limit++;
+    const prevCursor = cursor ? +cursor : null;
     if (!cursor) cursor = 0;
     if (!limit || limit > 20) limit = 20;
 
     const data = await this.ordersRepository.findAllAdmin(cursor, limit);
 
-    const prevCursor = cursor ? +cursor : null;
 
     if (!data[limit - 1]?.id) {
       cursor = null;

@@ -48,6 +48,7 @@ export class ProductsService {
     cursor: string | undefined | null;
   }) {
     limit++;
+    const prevCursor = cursor ? +cursor : null;
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
 
@@ -59,7 +60,6 @@ export class ProductsService {
       .catch((err) => {
         throw new BadRequestException('There are no more products available');
       });
-    const prevCursor = cursor ? +cursor : null;
 
     if (!data[limit - 1]?.id) {
       cursor = null;
@@ -86,6 +86,7 @@ export class ProductsService {
     limit: number;
   }) {
     limit++;
+    const prevCursor = cursor ? +cursor : null;
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
     const data = await this.productsRepository.findProductsByCategory({
@@ -94,7 +95,6 @@ export class ProductsService {
       limit,
     });
 
-    const prevCursor = cursor ? +cursor : null;
 
     if (!data[limit - 1]?.id) {
       cursor = null;
