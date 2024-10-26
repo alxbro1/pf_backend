@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { InsertProduct, ProductEntity } from '../../../db/schemas/schema';
+import { typeEnum } from './dto/type.enum';
+import { throwError } from 'rxjs';
 
 @Injectable()
 export class ProductsService {
@@ -10,28 +12,32 @@ export class ProductsService {
     return await this.productsRepository.createProduct(body);
   }
 
-  async findAll(cursor: string | undefined | null, limit: number) {
+  async findAll(cursor: string | undefined | null, limit: number, typeProduct: typeEnum | undefined) {
     limit++;
+    const prevCursor = cursor != undefined ? +cursor : null;
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
+    if (typeProduct != typeEnum.digital && typeProduct != typeEnum.physical && typeProduct != undefined) throw new BadRequestException('Invalid type product');
+      const data = await this.productsRepository.findAllProducts(
+        cursor,
+        limit,
+        typeProduct,
+      );
 
-    const data = await this.productsRepository.findAllProducts(cursor, limit);
 
-     const prevCursor = cursor ? +cursor : null;
+    if (!data[limit - 1]?.id) {
+      cursor = null;
+    } else {
+      cursor = data[limit - 1].id;
+    }
 
-     if (!data[limit - 1]?.id) {
-       cursor = null;
-     } else {
-       cursor = data[limit - 1].id;
-     }
-
-     cursor;
-     data.splice(limit, 1);
-     return {
-       data,
-       cursor: cursor,
-       prevCursor: prevCursor,
-     };
+    cursor;
+    data.splice(limit, 1);
+    return {
+      data,
+      cursor: cursor,
+      prevCursor: prevCursor,
+    };
   }
 
   async findAllDashboardProducts({

@@ -11,6 +11,7 @@ import {
 } from '../../../db/schemas/schema';
 import { eq, and, gte, inArray, gt, sql, asc } from 'drizzle-orm';
 import { FilesService } from '../files/files.service';
+import { typeEnum } from './dto/type.enum';
 
 @Injectable()
 export class ProductsRepository {
@@ -19,19 +20,33 @@ export class ProductsRepository {
   async findAllProducts(
     cursor: string,
     limit: number,
-  ): Promise<Omit<
-          ProductEntity,
-          'description' | 'categoryId' | 'stock' | 'active' | 'type'
-        >[]
-      | []> {
+    typeProduct: typeEnum | undefined,
+  ): Promise<
+    | Omit<
+        ProductEntity,
+        'description' | 'categoryId' | 'stock' | 'active' | 'type'
+      >[]
+    | []
+  > {
+    let where
+    if (typeProduct == typeEnum.physical || typeProduct == typeEnum.digital) {
+      where = and(
+        gte(products.stock, 1),
+        eq(products.active, true),
+        gte(products.id, cursor),
+        eq(products.type, typeProduct),
+      );
+    } else {
+      where = and(
+        gte(products.stock, 1),
+        eq(products.active, true),
+        gte(products.id, cursor),
+      );
+    }
     return await db.query.products
       .findMany({
         with: { category: { columns: { name: true } } },
-        where: and(
-          gte(products.stock, 1),
-          eq(products.active, true),
-          gte(products.id, cursor),
-        ),
+        where,
         columns: {
           categoryId: false,
           description: false,
@@ -77,10 +92,10 @@ export class ProductsRepository {
     limit,
   }: {
     category: string;
-    cursor: string ;
+    cursor: string;
     limit: number;
   }): Promise<Omit<InsertProduct, 'description' | 'categoryId' | 'stock'>[]> {
-    console.log(cursor)
+    console.log(cursor);
     const productsArr = await db.query.products
       .findMany({
         with: { category: { columns: { name: true } } },

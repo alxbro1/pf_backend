@@ -28,6 +28,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RemoveOneImageDto } from './dto/remove.dto';
 import { paginationDto } from './dto/pagination.dto';
+import { typeEnum } from './dto/type.enum';
 
 @Controller('products')
 @ApiTags('Products')
@@ -190,8 +191,9 @@ export class ProductsController {
   async findAll(
     @Query('cursor') cursor: string,
     @Query('limit', LimitPipe) limit: number,
+    @Query('type') typeProduct: typeEnum
   ) {
-    return await this.productsService.findAll( cursor, limit );
+    return await this.productsService.findAll(cursor, limit, typeProduct);
   }
 
   @Get('dashboardTable')
