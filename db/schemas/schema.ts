@@ -35,6 +35,7 @@ export const users = pgTable(
     email: text('email').unique().notNull(),
     emailVerified: timestamp('emailVerified', { mode: 'date' }),
     password: text('password'),
+    username: text('username').unique().notNull(),
     image: text('image').default('default_profile_picture.png').notNull(),
     active: boolean().default(true).notNull(),
   },

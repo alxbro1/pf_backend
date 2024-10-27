@@ -50,6 +50,7 @@ const main = async () => {
       name: faker.person.fullName(),
       email: faker.internet.email(),
       image: faker.image.avatar(),
+      username: faker.internet.userName(),
     });
   }
 
