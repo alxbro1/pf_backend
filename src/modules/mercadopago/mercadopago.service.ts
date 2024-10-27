@@ -18,10 +18,11 @@ export class MercadopagoService {
     private productsService: ProductsService,
   ) {}
   async create(body: CreateMercadopagoDto) {
-    try {
-      const user = await this.usersService.findOneBy(body.user);
+      const user = await this.usersService.findOneBy(body.user).catch(() => {
+        return undefined
+      })
 
-      if (!user || !user.id) {
+      if (!user?.id) {
         throw new BadRequestException('User not found');
       }
       const productsArr = await this.productsService.findManyByIds(
@@ -97,9 +98,7 @@ export class MercadopagoService {
 
       const preference = await new Preference(mpClient).create(orderBody);
       return { url: preference };
-    } catch (error) {
-      console.log(error);
-    }
+    
   }
 
   async webhook(body: any) {

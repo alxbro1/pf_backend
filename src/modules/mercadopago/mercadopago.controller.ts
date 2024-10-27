@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { MercadopagoService } from './mercadopago.service';
 import { CreateMercadopagoDto } from './dto/create-mercadopago.dto';
 import { MercadoPagoPreApproval } from 'mercadopago/resources/preapproval';
@@ -15,7 +10,9 @@ export class MercadopagoController {
 
   @Post()
   async create(@Body() createMercadopagoDto: any) {
-    return await this.mercadopagoService.create(createMercadopagoDto);
+    return await this.mercadopagoService
+      .create(createMercadopagoDto)
+      .then((res) => res)
   }
 
   @Post('webhook')
