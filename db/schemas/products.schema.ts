@@ -3,6 +3,7 @@ import { boolean } from 'drizzle-orm/pg-core';
 import { integer, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { categories } from './categories.schema';
+import { cartAndProducts } from './cart_products.schema';
 
 export const productTypeEnum = pgEnum('type_product_enum', [
   'digital',
@@ -26,11 +27,12 @@ export const products = pgTable('products', {
   active: boolean().default(true).notNull(),
 });
 
-export const productsRelations = relations(products, ({ one }) => ({
+export const productsRelations = relations(products, ({ one, many }) => ({
   category: one(categories, {
     fields: [products.categoryId],
     references: [categories.id],
   }),
+  cart: many(cartAndProducts),
 }));
 
 export const productInsertSchema = createInsertSchema(products, {
