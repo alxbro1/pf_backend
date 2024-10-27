@@ -190,10 +190,11 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get All Paginated Products (Page/Limit)' })
   async findAll(
     @Query('cursor') cursor: string,
-    @Query('limit', LimitPipe) limit: number,
-    @Query('type') typeProduct: typeEnum
+    @Query('limit') limit: number,
+    @Query('type') typeProduct: typeEnum,
+    @Query('search') search:string
   ) {
-    return await this.productsService.findAll(cursor, limit, typeProduct);
+    return await this.productsService.findAll(cursor, limit, typeProduct, search);
   }
 
   @Get('dashboardTable')

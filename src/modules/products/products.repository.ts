@@ -9,7 +9,7 @@ import {
   ProductEntity,
   products,
 } from '../../../db/schemas/schema';
-import { eq, and, gte, inArray, gt, sql, asc } from 'drizzle-orm';
+import { eq, and, gte, inArray, gt, sql, asc, ilike } from 'drizzle-orm';
 import { FilesService } from '../files/files.service';
 import { typeEnum } from './dto/type.enum';
 
@@ -21,6 +21,7 @@ export class ProductsRepository {
     cursor: string,
     limit: number,
     typeProduct: typeEnum | undefined,
+    search: string | undefined,
   ): Promise<
     | Omit<
         ProductEntity,
@@ -37,7 +38,11 @@ export class ProductsRepository {
     if (typeProduct == typeEnum.physical || typeProduct == typeEnum.digital) {
       where.push(eq(products.type, typeProduct));
     }
-    
+
+    if (search && search.trim() != '') {
+      where.push(ilike(products.name, `%${search}%`));
+    }
+
     return await db.query.products
       .findMany({
         with: { category: { columns: { name: true } } },

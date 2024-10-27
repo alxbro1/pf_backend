@@ -12,7 +12,7 @@ export class ProductsService {
     return await this.productsRepository.createProduct(body);
   }
 
-  async findAll(cursor: string | undefined | null, limit: number, typeProduct: typeEnum | undefined) {
+  async findAll( cursor: string | undefined | null, limit: number, typeProduct: typeEnum | undefined, search: string | undefined) {
     limit++;
     const prevCursor = cursor != undefined ? +cursor : null;
     if (!cursor) cursor = '0';
@@ -22,6 +22,7 @@ export class ProductsService {
         cursor,
         limit,
         typeProduct,
+        search
       );
 
 
@@ -34,8 +35,8 @@ export class ProductsService {
     cursor;
     data.splice(limit, 1);
     return {
-      data,
-      cursor: cursor,
+      products:[...data],
+      nextCursor: cursor,
       prevCursor: prevCursor,
     };
   }
