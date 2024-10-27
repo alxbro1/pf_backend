@@ -49,11 +49,7 @@ export class MailService {
     }
   }
 
-  async sendConfirmationMail(user: {
-    email: string;
-    name: string;
-    confirmationLink: string;
-  }) {
+  async sendConfirmationMail(user: { email: string; name: string }) {
     const mailOptions = {
       from: "'GameVault' <pablobattola@gmail.com>",
       to: user.email,
@@ -69,14 +65,14 @@ export class MailService {
           To get started, please confirm your account by clicking the button below.
         </p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${user.confirmationLink}" style="padding: 15px 25px; color: #fff; background-color: #28a745; text-decoration: none; border-radius: 5px; font-size: 16px;">
+          <a href="" style="padding: 15px 25px; color: #fff; background-color: #28a745; text-decoration: none; border-radius: 5px; font-size: 16px;">
             Confirm Account
           </a>
         </div>
         <p style="font-size: 14px; color: #777;">
           If the button doesn't work, copy and paste the following link into your browser:
           <br/>
-          <a href="${user.confirmationLink}" style="color: #007bff;">${user.confirmationLink}</a>
+          <a href="" style="color: #007bff;"></a>
         </p>
         <div style="text-align: center; margin-top: 20px;">
           <img src="https://wallpapercave.com/wp/wp4892943.jpg" alt="Thank you" style="width: 100%; max-width: 600px;"/>
@@ -292,4 +288,6 @@ export class MailService {
       console.error('Error sending delivered email:', error);
     }
   }
+
+  async verifiedEmail() {}
 }

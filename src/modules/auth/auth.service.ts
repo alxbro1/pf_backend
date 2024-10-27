@@ -7,9 +7,12 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { SelectUserDto, users } from '../../../db/schemas/schema';
 import { db } from '../../config/db';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
+  constructor(private readonly mailService: MailService) {}
+
   async register(registerDto: RegisterDto) {
     const { password, ...rest } = registerDto;
     const hashedPassword = await hash(password, 10);
@@ -20,6 +23,11 @@ export class AuthService {
         password: hashedPassword,
       },
     ]);
+
+    const { email, name } = rest;
+
+    await this.mailService.sendConfirmationMail({ email, name });
+    await this.mailService.sendWelcomeMail({ email, name });
 
     return;
   }

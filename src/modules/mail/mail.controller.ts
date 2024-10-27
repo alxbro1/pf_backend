@@ -1,4 +1,4 @@
-import { Body, Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MailService } from './mail.service';
 
 @Controller('mail-test')
@@ -162,4 +162,7 @@ export class MailController {
       return { message: 'Error sending delivery email', error };
     }
   }
+
+  @Post('verified-email')
+  async verifiedEmail() {}
 }
