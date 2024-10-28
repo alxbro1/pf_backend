@@ -9,7 +9,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: 'http://localhost:3000',
+    credentials: true,
+  },
+})
 export class WebsocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
@@ -17,11 +22,22 @@ export class WebsocketGateway
   server: Server;
 
   handleConnection(client: Socket) {
-    console.log(`Client Connected: ${client.id}`);
+    console.log('Socket ID:', client.id);
+    console.log(client.handshake)
+    const isAdmin = client.handshake.query.role === 'admin';
+
+    if (isAdmin) {
+      client.join('admin_room');
+      console.log(`Admin Connected: ${client.id}`);
+    } else {
+      client.join(`client_${client.id}`);
+      console.log(`Client Connected: ${client.id}`);
+    }
   }
 
   handleDisconnect(client: Socket) {
     console.log(`Client Disconnected: ${client.id}`);
+    client.leave(`client_${client.id}`);
   }
 
   @SubscribeMessage('messageToAdmin')
