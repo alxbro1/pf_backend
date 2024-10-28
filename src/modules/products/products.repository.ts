@@ -54,7 +54,7 @@ export class ProductsRepository {
           active: false,
           type: false,
         },
-        limit: limit + 1,
+        limit: limit,
         orderBy: asc(products.id),
       })
       .catch((err) => {

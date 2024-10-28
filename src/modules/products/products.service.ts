@@ -18,7 +18,7 @@ export class ProductsService {
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
     if (typeProduct != typeEnum.digital && typeProduct != typeEnum.physical && typeProduct != undefined) throw new BadRequestException('Invalid type product');
-      const data = await this.productsRepository.findAllProducts(
+      let data = await this.productsRepository.findAllProducts(
         cursor,
         limit,
         typeProduct,
