@@ -27,8 +27,8 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RemoveOneImageDto } from './dto/remove.dto';
-import { paginationDto } from './dto/pagination.dto';
 import { typeEnum } from './dto/type.enum';
+import { getProductsSchema } from './dto/get-products.dto';
 
 @Controller('products')
 @ApiTags('Products')
@@ -187,14 +187,25 @@ export class ProductsController {
       },
     },
   })
-  @ApiOperation({ summary: 'Get All Paginated Products (Page/Limit)' })
+  @ApiOperation({ summary: 'Get All Paginated Products' })
   async findAll(
     @Query('cursor') cursor: string,
     @Query('limit') limit: number,
     @Query('type') typeProduct: typeEnum,
-    @Query('search') search:string
+    @Query('search') search: string,
   ) {
-    return await this.productsService.findAll(cursor, limit, typeProduct, search);
+    const validation = getProductsSchema.safeParse({
+      cursor,
+      limit,
+      typeProduct,
+      search,
+    });
+
+    if (validation.success === false) {
+      throw new BadRequestException(validation.error.issues);
+    }
+
+    return this.productsService.findAll(validation.data);
   }
 
   @Get('dashboardTable')

@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { InsertProduct, ProductEntity } from '../../../db/schemas/schema';
-import { typeEnum } from './dto/type.enum';
-import { throwError } from 'rxjs';
+import type { GetProductsDto } from './dto/get-products.dto';
 
 @Injectable()
 export class ProductsService {
@@ -12,31 +11,11 @@ export class ProductsService {
     return await this.productsRepository.createProduct(body);
   }
 
-  async findAll( cursor: string | undefined | null, limit: number, typeProduct: typeEnum | undefined, search: string | undefined) {
-    limit++;
-    if (!cursor) cursor = '0';
-    if (!limit || limit > 20) limit = 20;
-    if (typeProduct != typeEnum.digital && typeProduct != typeEnum.physical && typeProduct != undefined) throw new BadRequestException('Invalid type product');
-      let data = await this.productsRepository.findAllProducts(
-        cursor,
-        limit,
-        typeProduct,
-        search
-      );
+  async findAll(getProductsDto: GetProductsDto) {
+    const products =
+      await this.productsRepository.findAllProducts(getProductsDto);
 
-
-    if (!data[limit - 1]?.id) {
-      cursor = null;
-    } else {
-      cursor = data[limit - 1].id;
-    }
-
-    cursor;
-    data.splice(limit, 1);
-    return {
-      products:[...data],
-      nextCursor: cursor,
-    };
+    return products;
   }
 
   async findAllDashboardProducts({
@@ -90,7 +69,6 @@ export class ProductsService {
       cursor,
       limit,
     });
-
 
     if (!data[limit - 1]?.id) {
       cursor = null;

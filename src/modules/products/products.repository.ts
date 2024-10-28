@@ -12,54 +12,70 @@ import {
 import { eq, and, gte, inArray, gt, sql, asc, ilike } from 'drizzle-orm';
 import { FilesService } from '../files/files.service';
 import { typeEnum } from './dto/type.enum';
+import type { GetProductsDto } from './dto/get-products.dto';
 
 @Injectable()
 export class ProductsRepository {
   constructor(private readonly filesService: FilesService) {}
 
-  async findAllProducts(
-    cursor: string,
-    limit: number,
-    typeProduct: typeEnum | undefined,
-    search: string | undefined,
-  ): Promise<
-    | Omit<
-        ProductEntity,
-        'description' | 'categoryId' | 'stock' | 'active' | 'type'
-      >[]
-    | []
-  > {
-    let where = [
-      gte(products.stock, 1),
-      eq(products.active, true),
-      gte(products.id, cursor),
-    ];
+  async findAllProducts({
+    limit,
+    cursor,
+    search,
+    type,
+  }: GetProductsDto): Promise<{
+    products: Omit<ProductEntity, 'categoryId'>[];
+    nextCursor: string | null;
+  }> {
+    const where = [gte(products.stock, 1), eq(products.active, true)];
 
-    if (typeProduct == typeEnum.physical || typeProduct == typeEnum.digital) {
-      where.push(eq(products.type, typeProduct));
+    if (type !== undefined) {
+      where.push(eq(products.type, type));
     }
 
     if (search && search.trim() != '') {
       where.push(ilike(products.name, `%${search}%`));
     }
 
-    return await db.query.products
+    if (cursor !== undefined) {
+      where.push(gte(products.id, cursor));
+    }
+
+    const NEXT_CURSOR_ITEM = 1;
+    const selectedProducts = await db.query.products
       .findMany({
-        with: { category: { columns: { name: true } } },
+        with: { category: { columns: { id: true, name: true } } },
         where: and(...where),
         columns: {
           categoryId: false,
-          description: false,
-          stock: false,
-          active: false,
-          type: false,
+          // description: false,
+          // stock: false,
+          // active: false,
+          // type: false,
         },
-        limit: limit,
+        limit: limit + NEXT_CURSOR_ITEM,
         orderBy: asc(products.id),
       })
       .catch((err) => {
         throw new BadRequestException('There are no more products available');
       });
+
+    let nextCursor: string | null = null;
+
+    if (selectedProducts.length === 0)
+      return {
+        products: [],
+        nextCursor,
+      };
+
+    if (selectedProducts.length > limit) {
+      nextCursor = selectedProducts.pop()!.id;
+    }
+
+    return {
+      products: selectedProducts,
+      nextCursor,
+    };
   }
 
   async findAllDashboardProducts({
@@ -232,5 +248,11 @@ export class ProductsRepository {
       );
 
     return { message: 'Product image modified successfuly.' };
+  }
+
+  async count() {
+    const count = await db.$count(products);
+
+    return count;
   }
 }
