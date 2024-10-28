@@ -14,7 +14,6 @@ export class ProductsService {
 
   async findAll( cursor: string | undefined | null, limit: number, typeProduct: typeEnum | undefined, search: string | undefined) {
     limit++;
-    const prevCursor = cursor != undefined ? +cursor : null;
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
     if (typeProduct != typeEnum.digital && typeProduct != typeEnum.physical && typeProduct != undefined) throw new BadRequestException('Invalid type product');
@@ -37,7 +36,6 @@ export class ProductsService {
     return {
       products:[...data],
       nextCursor: cursor,
-      prevCursor: prevCursor,
     };
   }
 
@@ -49,7 +47,6 @@ export class ProductsService {
     cursor: string | undefined | null;
   }) {
     limit++;
-    const prevCursor = cursor ? +cursor : null;
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
 
@@ -73,7 +70,6 @@ export class ProductsService {
     return {
       data,
       cursor: cursor,
-      prevCursor: prevCursor,
     };
   }
 
@@ -87,7 +83,6 @@ export class ProductsService {
     limit: number;
   }) {
     limit++;
-    const prevCursor = cursor ? +cursor : null;
     if (!cursor) cursor = '0';
     if (!limit || limit > 20) limit = 20;
     const data = await this.productsRepository.findProductsByCategory({
@@ -108,7 +103,6 @@ export class ProductsService {
     return {
       data,
       cursor: cursor,
-      prevCursor: prevCursor,
     };
   }
 
