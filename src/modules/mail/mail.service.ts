@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import crypto from 'crypto';
+import { randomBytes } from 'crypto';
 import { db } from '../../config/db';
 import { users } from '../../../db/schemas/users.schema';
 import { eq } from 'drizzle-orm';
@@ -58,7 +58,7 @@ export class MailService {
   }
 
   async sendConfirmationMail(user: { email: string; name: string }) {
-    const tokenGenerated = crypto.randomBytes(30).toString('hex');
+    const tokenGenerated = await randomBytes(30).toString('hex');
 
     const result = await db
       .update(users)

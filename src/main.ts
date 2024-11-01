@@ -2,10 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { PORT } from './config/enviroments.config';
+const morgan = require('morgan');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(morgan('dev'));
   app.enableCors();
   const swaggerConfig = new DocumentBuilder()
     .setTitle('GameVault - PF Co 53 - FT/FS')

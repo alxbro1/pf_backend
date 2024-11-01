@@ -11,6 +11,7 @@ import { MercadopagoModule } from './modules/mercadopago/mercadopago.module';
 import { WebsocketModule } from './modules/websockets/websockets.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { JwtModule } from '@nestjs/jwt';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JwtModule } from '@nestjs/jwt';
     MercadopagoModule,
     CartsModule,
     WebsocketModule,
+    WishlistModule,
   ],
 })
 export class AppModule {}

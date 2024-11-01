@@ -123,6 +123,9 @@ export class UsersController {
     return await this.usersService.findAll({ cursor, limit });
   }
 
+  @Get('wishlist/:id')
+  async getWishlistByUserId() {}
+
   @Get(':id')
   @ApiResponse({
     status: 200,
