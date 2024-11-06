@@ -37,7 +37,7 @@ export class CartsRepository {
             productId: false,
             cartId: false,
           },
-          limit: limit + 1,
+          /* limit: limit + 1, */
         },
       },
     });
@@ -79,14 +79,18 @@ export class CartsRepository {
       .execute(
         sql`
   INSERT INTO cart_products (cart_id, product_id, quantity)
-  SELECT 
+VALUES (
     (SELECT id FROM carts WHERE user_id = ${userId}),
     ${productId},
     ${quantity}
-  WHERE ${quantity} <= (SELECT stock FROM products WHERE id = ${productId})
+)
+ON CONFLICT (cart_id, product_id) DO UPDATE
+SET quantity = cart_products.quantity + ${quantity}
+WHERE cart_products.quantity + ${quantity} <= (SELECT stock FROM products WHERE id = ${productId});
 `,
       )
       .catch((error) => {
+        console.log(error);
         throw new BadRequestException(error.details);
       });
 
