@@ -18,6 +18,10 @@ export const orderStatusEnum = pgEnum('order_status', [
   'refound',
 ]);
 
+
+export const shippingStatusEnum = pgEnum("shipping_status", ["pending", "delivered"])
+
+
 export const orders = pgTable('orders', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   mpOrderId: varchar('mp_order_id', { length: 256 }).unique(),
@@ -28,7 +32,8 @@ export const orders = pgTable('orders', {
   createdAt: varchar('created_at', { length: 256 }).default(
     new Date().toISOString(),
   ),
-  discountPercentage:integer("discount_percentage").default(0)
+  discountPercentage: integer("discount_percentage").default(0),
+  shippingStatus: shippingStatusEnum("shipping_status").default("pending")
 });
 
 export type insertOrders = typeof orders.$inferInsert;
