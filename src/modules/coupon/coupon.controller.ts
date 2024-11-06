@@ -32,15 +32,46 @@ export class CouponController {
     description: 'Successfully retrieved all coupons',
     content: {
       'application/json': {
-        example: [
-          {
-            id: '1234-5678-abcd-efgh',
-            couponCode: 'SAVE20',
-            discountPercentage: 20,
-            expirationDate: '2024-12-31',
-            isActive: true,
-          },
-        ],
+        example: {
+          data: [
+            {
+              id: '1f18db45-2c2a-414c-ba81-09ef08d30019',
+              couponCode: 'ngb7afu9vx',
+              discountPercentage: 25,
+              expirationDate: '2024-11-25',
+              isActive: true,
+            },
+            {
+              id: '76025bcb-5ff1-43e0-beff-7ef37290f7b6',
+              couponCode: 'bnfvxz051kh',
+              discountPercentage: 25,
+              expirationDate: '2024-11-25',
+              isActive: true,
+            },
+            {
+              id: 'a1f7bcf6-110d-42d5-88d8-31b30f7e88f7',
+              couponCode: 'dup68nf5dzd',
+              discountPercentage: 25,
+              expirationDate: '2024-11-12',
+              isActive: true,
+            },
+            {
+              id: 'f216f03d-5c8e-4e42-ab69-10561a72b89c',
+              couponCode: 'bpi9nrl3cp9',
+              discountPercentage: 25,
+              expirationDate: '2024-11-25',
+              isActive: true,
+            },
+            {
+              id: 'fecd15a9-bfcc-4f8f-99ef-17eccc69b57a',
+              couponCode: 'w5rep6e97qf',
+              discountPercentage: 25,
+              expirationDate: '2024-11-12',
+              isActive: true,
+            },
+          ],
+          nextCursor: null,
+        },
       },
     },
   })
@@ -71,6 +102,51 @@ export class CouponController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Send coupons to multiple emails' })
+  @ApiBody({
+    description: 'Request body to send coupons to a list of emails',
+    required: true,
+    schema: {
+      type: 'object',
+      properties: {
+        emails: {
+          type: 'array',
+          items: { type: 'string', format: 'email' },
+          example: ['user1@example.com', 'user2@example.com'],
+        },
+        coupon: {
+          type: 'object',
+          properties: {
+            discountPercentage: { type: 'number', example: 20 },
+            expirationDate: {
+              type: 'string',
+              format: 'date',
+              example: '2024-12-31',
+            },
+          },
+          required: ['discountPercentage', 'expirationDate'],
+        },
+      },
+      example: {
+        emails: ['user1@example.com', 'user2@example.com'],
+        coupon: {
+          discountPercentage: 20,
+          expirationDate: '2024-12-31',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Coupons sent successfully',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Coupons sent successfully',
+        },
+      },
+    },
+  })
   async sendCoupons(@Body() sendCouponsDto: SendCouponsDto) {
     const input = sendCouponsSchema.safeParse(sendCouponsDto);
 
@@ -88,7 +164,7 @@ export class CouponController {
     description: 'Coupon validated successfully',
     content: {
       'application/json': {
-        example: 'Coupon Expired',
+        example: { message: 'Validation successful' },
       },
     },
   })
@@ -101,6 +177,19 @@ export class CouponController {
           message: 'Coupon not found',
           error: 'Not Found',
           statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Coupon validation failed (expired or inactive)',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Coupon is expired',
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     },
@@ -215,6 +304,19 @@ export class CouponController {
       'application/json': {
         example: {
           message: 'Coupon status changed successfully',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Coupon not found or invalid body',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Coupon not found',
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     },

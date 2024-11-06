@@ -38,53 +38,86 @@ export class UsersController {
     description: 'Get All Paginated Users successfully',
     content: {
       'aplication/json': {
-        example: [
-          {
-            id: 'a132aee0-ceba-42d8-8154-6739b44293b3',
-            name: 'Salvatore Ward',
-            email: 'Tremayne87@gmail.com',
-            emailVerified: null,
-            password: null,
-            image: 'https://avatars.githubusercontent.com/u/43817641',
-            active: true,
-          },
-          {
-            id: '94113ad8-4a8e-468a-8f7c-df7f02e3ec37',
-            name: 'Francis Ullrich',
-            email: 'Orlando49@gmail.com',
-            emailVerified: null,
-            password: null,
-            image: 'https://avatars.githubusercontent.com/u/37748039',
-            active: true,
-          },
-          {
-            id: 'deba1532-bafe-4c67-aafb-9650977458e4',
-            name: 'Irvin Hartmann',
-            email: 'Brooke95@yahoo.com',
-            emailVerified: null,
-            password: null,
-            image: 'https://avatars.githubusercontent.com/u/1769050',
-            active: true,
-          },
-          {
-            id: 'f09ea382-ff1c-47d8-b61c-9f604484282d',
-            name: 'Sam Vandervort',
-            email: 'Erika_Wisozk72@yahoo.com',
-            emailVerified: null,
-            password: null,
-            image: 'https://avatars.githubusercontent.com/u/73052762',
-            active: true,
-          },
-          {
-            id: '7a78a581-4b6f-48e4-b70e-36d45ab4b857',
-            name: 'Shelia Armstrong',
-            email: 'Jarrod.Strosin@hotmail.com',
-            emailVerified: null,
-            password: null,
-            image: 'https://avatars.githubusercontent.com/u/48341592',
-            active: true,
-          },
-        ],
+        example: {
+          data: [
+            {
+              id: '103d0472-b4ac-4502-beb8-f035cb95103b',
+              name: 'Agnes Cartwright',
+              email: 'Tania_Sanford11@hotmail.com',
+              emailVerified: null,
+              tokenConfirmation: null,
+              username: 'Alena_Harris',
+              description: null,
+              profileImage: 'https://avatars.githubusercontent.com/u/98174912',
+              bannerImage:
+                'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730401954/pk3ghbuuvspa1wro9y7k.jpg',
+              status: 'active',
+              role: 'client',
+              bannedReason: null,
+            },
+            {
+              id: '26d4808d-59f0-4e1f-aab4-57dff38832ac',
+              name: 'Tamara Kuvalis V',
+              email: 'Cassidy89@gmail.com',
+              emailVerified: null,
+              tokenConfirmation: null,
+              username: 'Lily_Ward16',
+              description: null,
+              profileImage: 'https://avatars.githubusercontent.com/u/28631406',
+              bannerImage:
+                'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730401954/pk3ghbuuvspa1wro9y7k.jpg',
+              status: 'active',
+              role: 'client',
+              bannedReason: null,
+            },
+            {
+              id: '2b93a00f-f306-479b-b8e5-793ce79af2c8',
+              name: 'Kevin Renner V',
+              email: 'Dino8@yahoo.com',
+              emailVerified: null,
+              tokenConfirmation: '1',
+              username: 'Ethelyn_Kulas5',
+              description: null,
+              profileImage: 'https://avatars.githubusercontent.com/u/82591944',
+              bannerImage:
+                'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730401954/pk3ghbuuvspa1wro9y7k.jpg',
+              status: 'active',
+              role: 'client',
+              bannedReason: null,
+            },
+            {
+              id: '30a4e23a-e364-4212-b67b-b79662d38e87',
+              name: 'Ms. Janis Kreiger',
+              email: 'Tremaine.Kilback81@hotmail.com',
+              emailVerified: null,
+              tokenConfirmation: null,
+              username: 'Lindsey.Mohr',
+              description: null,
+              profileImage: 'https://avatars.githubusercontent.com/u/83944725',
+              bannerImage:
+                'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730401954/pk3ghbuuvspa1wro9y7k.jpg',
+              status: 'active',
+              role: 'client',
+              bannedReason: null,
+            },
+            {
+              id: '36d6aa2f-7cba-4573-9fce-048f0249b6af',
+              name: 'Jeanne Rau',
+              email: 'Ida_Pfannerstill@gmail.com',
+              emailVerified: null,
+              tokenConfirmation: null,
+              username: 'Noelia_Hirthe85',
+              description: null,
+              profileImage: 'https://avatars.githubusercontent.com/u/82785249',
+              bannerImage:
+                'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730401954/pk3ghbuuvspa1wro9y7k.jpg',
+              status: 'active',
+              role: 'client',
+              bannedReason: null,
+            },
+          ],
+          nextCursor: '3c296fe9-8bf4-4449-8f9f-021c89578f69',
+        },
       },
     },
   })
@@ -128,13 +161,21 @@ export class UsersController {
     content: {
       'aplication/json': {
         example: {
-          id: 'd3fc4271-cd60-4bae-8da2-fddc5ef532ab',
-          name: 'Sam Rippin',
-          email: 'Marietta71@hotmail.com',
-          emailVerified: null,
-          password: null,
-          image: 'https://avatars.githubusercontent.com/u/28839465',
-          active: true,
+          id: '103d0472-b4ac-4502-beb8-f035cb95103b',
+          name: 'Agnes Cartwright',
+          email: 'Tania_Sanford11@hotmail.com',
+          emailVerified: true,
+          tokenConfirmation:
+            'eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..F3pBOAive4TNz6zp.cNe0145bpACdLJqj7tLKbUmTU5IW3oh1O-RB6B134O0uKfsENTbtvpAgH9SdkHAX4PT',
+          password: 'E8ib8K0x_qmDpxx',
+          username: 'Alena_Harris',
+          description: null,
+          profileImage: 'https://avatars.githubusercontent.com/u/98174912',
+          bannerImage:
+            'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730401954/pk3ghbuuvspa1wro9y7k.jpg',
+          status: 'active',
+          role: 'client',
+          bannedReason: null,
         },
       },
     },
@@ -165,6 +206,8 @@ export class UsersController {
       type: 'object',
       properties: {
         name: { type: 'string', example: 'Battola Pablo' },
+        username: { type: 'string', example: 'Battola123' },
+        description: { type: 'string', example: 'Executive Director' },
       },
     },
   })
@@ -175,10 +218,17 @@ export class UsersController {
       'aplication/json': {
         example: [
           {
-            email: 'Erika_Wisozk72@yahoo.com',
-            id: 'f09ea382-ff1c-47d8-b61c-9f604484282d',
+            email: 'Tania_Sanford11@hotmail.com',
+            id: '103d0472-b4ac-4502-beb8-f035cb95103b',
             name: 'Battola Pablo',
-            image: 'https://avatars.githubusercontent.com/u/73052762',
+            image: 'https://avatars.githubusercontent.com/u/98174912',
+            username: 'Battola',
+            description: null,
+            status: 'active',
+            role: 'client',
+            profileImage: 'https://avatars.githubusercontent.com/u/98174912',
+            bannerImage:
+              'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730401954/pk3ghbuuvspa1wro9y7k.jpg',
           },
         ],
       },
@@ -247,6 +297,43 @@ export class UsersController {
       },
     },
   })
+  @ApiResponse({
+    status: 200,
+    description: 'User Deleted successfully',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Image upload Succesfuly',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not Found',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'User not Found',
+          error: 'Not Found',
+          statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'The image must be less than 1mb.',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'The image must be less than 1mb.',
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    },
+  })
   @ApiOperation({ summary: 'Update user profile image' })
   @Patch('uploadImage/:uuid')
   @UseInterceptors(FileInterceptor('image'))
@@ -271,6 +358,58 @@ export class UsersController {
   }
 
   @Patch('removeImage/:uuid')
+  @ApiResponse({
+    status: 200,
+    description: 'User profile image modified successfuly.',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'User profile image modified successfuly.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not Found',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'User not Found',
+          error: 'Not Found',
+          statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Image not Found or ID not provided',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Image not Found or ID not provided',
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    },
+  })
+  @ApiBody({
+    description: 'Request body for deleting image',
+    required: true,
+    schema: {
+      type: 'object',
+      properties: {
+        publicId: {
+          type: 'string',
+          example:
+            'pk3ghbuuvspa1wro9y7k',
+        },
+      },
+    },
+  })
+  @ApiOperation({ summary: 'Delete user profile image' })
   async removeProfileImage(
     @Param('uuid', ParseUUIDPipe) id: string,
     @Body() body: RemoveUserProfileDto,

@@ -28,17 +28,23 @@ export class MailService {
       to: user.email,
       subject: 'Welcome to GameVault',
       html: `
-      <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f2f2f2;">
-        <h2 style="color: #333;">Hello, ${user.name}!</h2>
-        <p>Welcome to <strong>GameVault</strong>! We are glad you're here.</p>
-        <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
-        <p>To explore our platform, click the button below:</p>
-        <a href="https://gamevault.com/explore" 
-           style="display: inline-block; padding: 10px 20px; background-color: #007BFF; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">
-          Explore GameVault
-        </a>
-        <p style="margin-top: 20px; color: #777;">If you have any questions, feel free to contact us.</p>
-        <p style="color: #333;">Enjoy your experience at GameVault!</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #333; color: #fff; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
+        </div>
+        <h2 style="color: #007BFF; text-align: center;">Hello, ${user.name}!</h2>
+        <p style="font-size: 16px; text-align: center;">Welcome to <strong>GameVault</strong>! We are glad you're here.</p>
+        
+        <p style="font-size: 16px; text-align: center;">To explore our platform, click the button below:</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="https://gamevault.com/explore" 
+             style="display: inline-block; padding: 12px 24px; background-color: #007BFF; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
+            Explore GameVault
+          </a>
+        </div>
+
+        <p style="font-size: 14px; text-align: center; color: #ccc; margin-top: 20px;">If you have any questions, feel free to contact us.</p>
+        <p style="font-size: 14px; text-align: center; color: #ccc;">Enjoy your experience at GameVault!<br>The GameVault Team</p>
       </div>
     `,
       attachments: [
@@ -49,11 +55,12 @@ export class MailService {
         },
       ],
     };
+
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      console.log(`Confirmation email sent: ${info.messageId}`);
+      console.log(`Welcome email sent: ${info.messageId}`);
     } catch (error) {
-      console.error('Error sending confirmation email:', error);
+      console.error('Error sending welcome email:', error);
     }
   }
 
@@ -74,33 +81,34 @@ export class MailService {
       to: user.email,
       subject: 'Confirm Your Account',
       html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #333; color: #fff; border-radius: 8px;">
         <div style="text-align: center; margin-bottom: 20px;">
           <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
         </div>
-        <h2 style="color: #333;">Hello ${user.name},</h2>
-        <p style="font-size: 16px; color: #555;">
-          Thank you for joining GameVault! We are excited to have you with us.
-          To get started, please confirm your account by clicking the button below.
-        </p>
+        <h2 style="color: #007BFF; text-align: center;">Hello, ${user.name}!</h2>
+        <p style="font-size: 16px; text-align: center;">Thank you for joining GameVault! We are excited to have you with us.</p>
+        <p style="font-size: 16px; text-align: center;">To get started, please confirm your account by clicking the button below:</p>
+        
         <div style="text-align: center; margin: 30px 0;">
-          <a href="http://localhost:3001/mail/verified-email/${tokenGenerated}" style="padding: 15px 25px; color: #fff; background-color: #28a745; text-decoration: none; border-radius: 5px; font-size: 16px;">
+          <a href="http://localhost:3001/mail/verified-email/${tokenGenerated}" 
+             style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
             Confirm Account
           </a>
         </div>
-        <p style="font-size: 14px; color: #777;">
-          If the button doesn't work, copy and paste the following link into your browser:
-          <br/>
-          <a href="http://localhost:3001/mail/verified-email/${tokenGenerated}" style="color: #007bff;">http://localhost:3001/mail/verified-email/${tokenGenerated}</a>
+        
+        <p style="font-size: 14px; color: #ccc; text-align: center;">If the button doesn't work, copy and paste the following link into your browser:</p>
+        <p style="font-size: 14px; color: #007BFF; text-align: center;">
+          <a href="http://localhost:3001/mail/verified-email/${tokenGenerated}" style="color: #007BFF;">http://localhost:3001/mail/verified-email/${tokenGenerated}</a>
         </p>
+
         <div style="text-align: center; margin-top: 20px;">
-          <img src="https://wallpapercave.com/wp/wp4892943.jpg" alt="Thank you" style="width: 100%; max-width: 600px;"/>
+          <img src="cid:footer@gamevault" alt="Thank you" style="width: 100%; max-width: 600px;"/>
         </div>
       </div>
     `,
       attachments: [
         {
-          filename: 'horizon.png',
+          filename: 'logo.png',
           path: 'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730565786/dlin5sg99n8avumxxpal.jpg',
           cid: 'logo@gamevault',
         },
@@ -278,24 +286,37 @@ export class MailService {
       to: user.email,
       subject: 'Congratulations! Here’s Your Gift Coupon!',
       html: `
-      <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;">
-        <h2 style="color: #333;">🎉 Hello, ${user.email}! 🎉</h2>
-        <p>We are thrilled to present you with an exclusive gift coupon!</p>
-        <div style="border: 2px dashed #4CAF50; padding: 20px; margin: 20px auto; width: 80%; max-width: 600px; border-radius: 10px; background-color: #e9f8e9;">
-          <h3 style="color: #4CAF50; font-size: 24px;">Coupon Code: <strong style="font-size: 28px;">${coupon.couponCode}</strong></h3>
-          <p style="font-size: 20px;">Discount: <strong style="color: #ff5722; font-size: 26px;">${coupon.discountPercentage}% OFF</strong></p>
-          <p style="font-size: 18px;">Valid until: <strong>${coupon.expirationDate}</strong></p>
-        </div>
-        <p>Use this code on your next purchase and enjoy your discount!</p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #333; color: #fff; border-radius: 8px;">
+      <div style="text-align: center; margin-bottom: 20px;">
         <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
-        <p>Thank you for being a part of <strong>GameVault</strong>.</p>
       </div>
-    `,
+      <h2 style="color: #007BFF; text-align: center;">🎉 Congratulations, ${user.email}! 🎉</h2>
+      <p style="font-size: 16px; text-align: center;">We are excited to offer you an exclusive gift coupon!</p>
+      
+      <div style="text-align: center; margin: 30px 0; border: 2px dashed #fff; padding: 20px; border-radius: 8px; background-color: #444;">
+        <h3 style="font-size: 24px; color: #28a745;">Coupon Code: <strong style="font-size: 28px;">${coupon.couponCode}</strong></h3>
+        <p style="font-size: 20px;">Discount: <strong style="color: #ff5722; font-size: 26px;">${coupon.discountPercentage}% OFF</strong></p>
+        <p style="font-size: 18px;">Valid until: <strong>${coupon.expirationDate}</strong></p>
+      </div>
+      
+      <p style="font-size: 16px; text-align: center;">Use this code on your next purchase and enjoy your discount!</p>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <img src="cid:footer@gamevault" alt="Thank you" style="width: 100%; max-width: 600px;"/>
+      </div>
+      <p style="font-size: 14px; color: #ccc; text-align: center;">Thank you for being part of <strong>GameVault</strong>.</p>
+    </div>
+  `,
       attachments: [
         {
           filename: 'logo.png',
           path: 'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730565786/dlin5sg99n8avumxxpal.jpg',
           cid: 'logo@gamevault',
+        },
+        {
+          filename: 'footer-image.png',
+          path: 'https://wallpapercave.com/wp/wp4892943.jpg',
+          cid: 'footer@gamevault',
         },
       ],
     };

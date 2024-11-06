@@ -76,6 +76,12 @@ export class UsersRepository {
         id: users.id,
         name: users.name,
         image: users.profileImage,
+        username: users.username,
+        description: users.description,
+        status: users.status,
+        role: users.role,
+        profileImage: users.profileImage,
+        bannerImage: users.bannerImage,
       });
     if (updateUser.length == 0) throw new NotFoundException('User Not Found');
     return updateUser;
@@ -104,10 +110,13 @@ export class UsersRepository {
     if (resultUser.length === 0)
       throw new NotFoundException(`User with ${id} uuid not found.`);
 
-    return resultFile;
+    return { message: 'Image upload Successfuly' };
   }
 
   async removeProfileImage(userId: string, publicId: string) {
+    if (!publicId)
+      throw new BadRequestException('Image not Found or ID not provided');
+    if (!userId) throw new BadRequestException('User not Found');
     await this.filesService.removeSingleImage(publicId);
 
     const result = await db
