@@ -7,6 +7,7 @@ import { OrdersService } from '../orders/orders.service';
 import { ProductsService } from '../products/products.service';
 import { CouponService } from '../coupon/coupon.service';
 import { SelectUserDto } from '../../../db/schemas/users.schema';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class MercadopagoService {
@@ -14,6 +15,7 @@ export class MercadopagoService {
     private ordersService: OrdersService,
     private productsService: ProductsService,
     private couponService: CouponService,
+    private mailService: MailService,
   ) {}
 
   async create(body: CreateMercadopagoDto, user: SelectUserDto) {
@@ -134,12 +136,16 @@ export class MercadopagoService {
         payer: {
           email: user.email,
           id: user.id,
+          name: user.name || undefined,
         },
         notification_url: `${HOST}/mercadopago/webhook`,
         metadata: {
           userId: user.id,
           email: user.email,
           orderId,
+          name: user.name,
+          product: orderId.product,
+          total: orderId.total,
         },
       },
     };
@@ -152,6 +158,9 @@ export class MercadopagoService {
   async webhook(body: any) {
     if (body.data) {
       const payment: any = await new Payment(mpClient).get(body.data);
+      if (payment.status === "paid") {
+      throw new BadRequestException("Already Paid")
+    }
       console.log('Payment received:', payment);
 
       const products = payment.additional_info.items;
@@ -159,10 +168,24 @@ export class MercadopagoService {
 
       if (payment.status == 'approved') {
         console.log('Payment approved:', payment.id);
+        console.log(metadata);
 
         const productsData = await this.productsService.findManyByIds(
           products.map((product: { id: any }) => product.id),
         );
+        const orderDetails = {
+          orderId: metadata.order_id,
+          product: productsData.map((product: any) => ({
+            name: product.name,
+            type: product.type,
+          })),
+          total: payment.transaction_amount,
+        };
+        const user = { email: metadata.email, name: metadata.name };
+        console.log(user);
+        console.log(orderDetails);
+
+        await this.mailService.sendOrderMail(user, orderDetails);
 
         products.forEach(async (product: { id: any; quantity: any }) => {
           const productDb = productsData.find((prod) => prod.id === product.id);

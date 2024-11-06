@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { MailService } from './mail.service';
 
 @Controller('mail')
@@ -36,132 +36,6 @@ export class MailController {
     }
   }
 
-  @Get('send-order-email')
-  async sendOrderEmail() {
-    const user = {
-      email: 'pablod_ferrero@hotmail.com',
-      name: 'Juan Pérez',
-    };
-
-    const orderDetails = {
-      orderId: '123456',
-      items: 'Game A, Game B, Game C',
-      total: 59.99,
-    };
-
-    try {
-      await this.mailService.sendOrderMail(user, orderDetails);
-      return { message: 'Order email sent successfully' };
-    } catch (error) {
-      return { message: 'Error sending order email', error };
-    }
-  }
-
-  @Get('send-preparation')
-  async sendPreparationMail(
-    @Body() data: { user: { email: string; name: string }; orderId: string },
-  ) {
-    const user = {
-      email: 'pablod_ferrero@hotmail.com',
-      name: 'Juan Pérez',
-    };
-
-    const orderDetails = {
-      orderId: '123456',
-      items: 'Game A, Game B, Game C',
-      total: 59.99,
-    };
-    try {
-      await this.mailService.sendPreparationMail(user, orderDetails.orderId);
-      return { message: 'Preparation email sent successfully' };
-    } catch (error) {
-      return { message: 'Error sending preparation email', error };
-    }
-  }
-
-  @Get('send-dispatched')
-  async sendDispatchedMail(
-    @Body()
-    data: {
-      user: { email: string; name: string };
-      orderId: string;
-      trackingNumber: string;
-    },
-  ) {
-    const user = {
-      email: 'pablod_ferrero@hotmail.com',
-      name: 'Juan Pérez',
-    };
-
-    const dispatch = {
-      user: user,
-      orderId: '12345',
-      trackingNumber: '23423nidfnix',
-    };
-    try {
-      await this.mailService.sendDispatchedMail(
-        user,
-        dispatch.orderId,
-        dispatch.trackingNumber,
-      );
-      return { message: 'Dispatched order email sent successfully' };
-    } catch (error) {
-      return { message: 'Error sending dispatched email', error };
-    }
-  }
-
-  @Get('send-on-the-way')
-  async sendOnTheWayMail(
-    @Body()
-    data: {
-      user: { email: string; name: string };
-      orderId: string;
-      trackingNumber: string;
-    },
-  ) {
-    const user = {
-      email: 'pablod_ferrero@hotmail.com',
-      name: 'Juan Pérez',
-    };
-
-    const dispatch = {
-      user: user,
-      orderId: '12345',
-      trackingNumber: '23423nidfnix',
-    };
-    try {
-      await this.mailService.sendOnTheWayMail(
-        user,
-        dispatch.orderId,
-        dispatch.trackingNumber,
-      );
-      return { message: 'On the way order email sent successfully' };
-    } catch (error) {
-      return { message: 'Error sending on the way email', error };
-    }
-  }
-
-  @Get('send-delivered')
-  async sendDeliveredMail(
-    @Body() data: { user: { email: string; name: string }; orderId: string },
-  ) {
-    const user = {
-      email: 'pablod_ferrero@hotmail.com',
-      name: 'Juan Pérez',
-    };
-
-    const orderDetails = {
-      orderId: '123456',
-      items: 'Game A, Game B, Game C',
-      total: 59.99,
-    };
-    try {
-      await this.mailService.sendDeliveredMail(user, orderDetails.orderId);
-      return { message: 'Delivered order email sent successfully' };
-    } catch (error) {
-      return { message: 'Error sending delivery email', error };
-    }
-  }
 
   @Post('verified-email/:token')
   async verifiedEmail(@Param('token') token: string) {}
@@ -200,4 +74,34 @@ export class MailController {
       return { message: 'Error sending some coupons', error };
     }
   }
+
+  @Post('send-order')
+  async sendOrder(
+    @Body()
+    data: {
+      email: string;
+      name: string;
+      orderDetails: {
+        orderId: string;
+        product: Array<{ name: string; type: 'digital' | 'physical' }>;
+        total: number;
+      };
+    },
+  ) {
+    const { email, name, orderDetails } = data;
+
+    try {
+      await this.mailService.sendOrderMail({ email, name }, orderDetails);
+      return { message: 'Order details email sent successfully!' };
+    } catch (error) {
+      console.error('Error sending order details:', error);
+      return { message: 'Error sending order details email', error };
+    }
+  }
+
 }
+
+
+
+
+

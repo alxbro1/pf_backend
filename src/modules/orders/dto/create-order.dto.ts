@@ -22,5 +22,6 @@ export class CreateOrderDto {
   products: products[];
 
   amount: number;
+  
 
 }

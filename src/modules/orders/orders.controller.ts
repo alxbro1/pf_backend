@@ -1,20 +1,18 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
   Query,
-  ParseIntPipe,
   BadRequestException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+
 import { ApiTags } from '@nestjs/swagger';
-import { paginationByUserDto, paginationCursorNumberDto, paginationDto } from '../../schemas/pagination.dto';
+import {
+  paginationByUserDto,
+  paginationCursorNumberDto,
+
+} from '../../schemas/pagination.dto';
 
 @Controller('orders')
 @ApiTags('Orders')
@@ -27,7 +25,7 @@ export class OrdersController {
     @Query('cursor') cursor: number,
     @Query('userId') userId: string,
   ) {
-    const validation = paginationByUserDto.safeParse({ cursor, limit, userId })
+    const validation = paginationByUserDto.safeParse({ cursor, limit, userId });
 
     if (validation.success === false) {
       throw new BadRequestException(validation.error.issues);
@@ -51,5 +49,11 @@ export class OrdersController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.ordersService.findOne(id);
+  }
+
+  @Get('deliver/:id')
+  async markOrderAsDelivered(@Param('id') orderId: number) {
+    const order = await this.ordersService.markOrderAsDelivered(orderId);
+    return { message: 'Order successfully marked as delivered', order };
   }
 }
