@@ -14,6 +14,7 @@ import { eq, and, gte } from 'drizzle-orm';
 import { FilesService } from '../files/files.service';
 import { FindAllUsersDto } from './dto/findAll.dto';
 import { z } from 'zod';
+import { compare, hash } from 'bcrypt';
 
 @Injectable()
 export class UsersRepository {
@@ -120,5 +121,31 @@ export class UsersRepository {
       throw new NotFoundException(`User with ${userId} didn't exist.`);
 
     return { message: 'User profile image modified successfuly.' };
+  }
+
+  async editPassword(id: string, oldPassword: string, newPassword: string) {
+    const userFound = await db.query.users.findFirst({
+      where: eq(users.id, id),
+    });
+
+    if (!userFound)
+      throw new NotFoundException(`User with ${id} uuid not found.`);
+
+    const valid = await compare(oldPassword, userFound.password!);
+
+    if (valid === false)
+      throw new BadRequestException(
+        `Old password isn't equal to actual password.`,
+      );
+
+    const hashedPassword = await hash(newPassword, 10);
+
+    await db
+      .update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.id, id))
+      .returning();
+
+    return { message: 'User password updated.' };
   }
 }

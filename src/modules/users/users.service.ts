@@ -33,4 +33,12 @@ export class UsersService {
   async removeProfileImage(userId: string, publicId: string) {
     return await this.usersRepository.removeProfileImage(userId, publicId);
   }
+
+  async editPassword(id: string, oldPassword: string, newPassword: string) {
+    return await this.usersRepository.editPassword(
+      id,
+      oldPassword,
+      newPassword,
+    );
+  }
 }

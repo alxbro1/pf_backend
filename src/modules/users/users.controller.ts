@@ -26,6 +26,7 @@ import { LimitPipe } from '../products/pipes/limitPage.pipe';
 import { CreateUserDto } from '../../../db/schemas/schema';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RemoveUserProfileDto } from './dto/remove.dto';
+import { EditPasswordDto } from './dto/editPassword.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -276,5 +277,15 @@ export class UsersController {
     @Body() body: RemoveUserProfileDto,
   ) {
     return await this.usersService.removeProfileImage(id, body.publicId);
+  }
+
+  @Patch('editPassword/:uuid')
+  async editPassword(
+    @Param('uuid', ParseUUIDPipe) id: string,
+    @Body() body: EditPasswordDto,
+  ) {
+    const { oldPassword, newPassword } = body;
+
+    return await this.usersService.editPassword(id, oldPassword, newPassword);
   }
 }
