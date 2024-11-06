@@ -4,6 +4,7 @@ import {
   Param,
   Query,
   BadRequestException,
+  Res,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 
@@ -13,6 +14,7 @@ import {
   paginationCursorNumberDto,
 
 } from '../../schemas/pagination.dto';
+import { Response } from 'express';
 
 @Controller('orders')
 @ApiTags('Orders')
@@ -52,8 +54,21 @@ export class OrdersController {
   }
 
   @Get('deliver/:id')
-  async markOrderAsDelivered(@Param('id') orderId: number) {
-    const order = await this.ordersService.markOrderAsDelivered(orderId);
-    return { message: 'Order successfully marked as delivered', order };
+  async markOrderAsDelivered(
+    @Param('id') orderId: number,
+    @Res() res: Response,
+  ) {
+    try {
+      const order = await this.ordersService.markOrderAsDelivered(orderId);
+
+      if (order) {
+        return res.redirect('http://localhost:3000');
+      }
+
+      return res.redirect('http://localhost:3000');
+    } catch (error) {
+      console.error('Error:', error);
+      return res.redirect('http://localhost:3000');
+    }
   }
 }
