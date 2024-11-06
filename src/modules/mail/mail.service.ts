@@ -182,7 +182,7 @@ export class MailService {
         Once your order is delivered, you can update its status by clicking the following link:
       </p>
       <div style="text-align: center; margin: 20px 0;">
-        <a href="http://localhost:3001/orders/deliver/${orderDetails.orderId}" 
+        <a href="http://localhost:3001/orders/deliver/${orderDetails.orderId}?redirect=true" 
           style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
           Mark as Delivered
         </a>
