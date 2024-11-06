@@ -118,18 +118,18 @@ export class CartsRepository {
     const productsInCart = products
       .filter((product) =>
         cart.products.find(
-          (cartProduct) => cartProduct.productId == product.id,
+          (cartProduct) => cartProduct.productId == product.productId,
         ),
       )
       ?.map((product) => {
         const productInCart = cart.products.find(
-          (productCart) => productCart.productId === product.id,
+          (productCart) => productCart.productId === product.productId,
         );
 
         if (productInCart) {
-          product.quantity += productInCart.quantity;
-          productInCart?.product?.stock < product.quantity &&
-            (product.quantity = productInCart?.product.stock);
+          product.qty += productInCart.quantity;
+          productInCart?.product?.stock < product.qty &&
+            (product.qty = productInCart?.product.stock);
         }
         return product;
       })
@@ -137,7 +137,7 @@ export class CartsRepository {
     const productsNotInCart = products.filter(
       (product) =>
         !cart.products.find(
-          (productCart) => productCart.productId === product.id,
+          (productCart) => productCart.productId === product.productId,
         ),
     );
 
@@ -147,8 +147,8 @@ export class CartsRepository {
         .values(
           productsNotInCart.map((product) => ({
             cartId: cart.id,
-            productId: product.id,
-            quantity: product.quantity,
+            productId: product.productId,
+            quantity: product.qty,
           })),
         )
         .returning({
@@ -161,9 +161,9 @@ export class CartsRepository {
         await db
           .update(cartAndProducts)
           .set({
-            quantity: product.quantity,
+            quantity: product.qty,
           })
-          .where(eq(cartAndProducts.productId, product.id))}
+          .where(eq(cartAndProducts.productId, product.productId))}
       );
 
       await Promise.all(updatePromises);
