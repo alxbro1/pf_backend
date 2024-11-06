@@ -2,6 +2,7 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { db } from '../../config/db';
@@ -160,6 +161,7 @@ export class ordersRepository {
   }
 
   async markOrderAsDelivered(orderId: number) {
+    if(!orderId) throw new NotFoundException("Order not found")
     const order = await db
       .select()
       .from(orders)
@@ -171,7 +173,11 @@ export class ordersRepository {
     }
 
     if (order[0].shippingStatus === 'delivered') {
-      throw new BadRequestException('Order is already marked as delivered');
+
+      return {
+        order: order[0],
+        message: 'Order was already marked as delivered',
+      };
     }
 
     const dbResponse = await db

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { hash } from 'bcrypt';
 import { compare } from 'bcrypt';
@@ -14,24 +14,36 @@ export class AuthService {
   constructor(private readonly mailService: MailService) {}
 
   async register(registerDto: RegisterDto) {
-    const { password, ...rest } = registerDto;
+    const { password, email, name, ...rest } = registerDto;
+
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1)
+      .execute();
+
+
+    if (existingUser.length > 0) {
+      throw new NotFoundException('Email already exist');
+    }
+
     const hashedPassword = await hash(password, 10);
 
     await db.insert(users).values([
       {
         ...rest,
+        email,
         password: hashedPassword,
       },
     ]);
 
-    const { email, name } = rest;
 
     await this.mailService.sendConfirmationMail({ email, name });
     await this.mailService.sendWelcomeMail({ email, name });
 
-    return;
+    return { message: 'User registration was successful' };
   }
-
   async login(loginDto: LoginDto): Promise<SelectUserDto> {
     // const selectedUsers = await db
     //   .select()

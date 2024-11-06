@@ -1,11 +1,35 @@
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { MailService } from './mail.service';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('mail')
+@ApiTags('Mail Service')
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
   @Get('send-welcome-email')
+  @ApiOperation({ summary: 'Send a welcome email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Welcome email sent successfully',
+    content: {
+      'application/json': {
+        example: { message: 'Welcome email sent successfully' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error sending welcome email',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Error sending welcome email',
+          error: 'Detailed error message',
+        },
+      },
+    },
+  })
   async sendWelcomeEmail() {
     const user = {
       email: 'pablod_ferrero@hotmail.com',
@@ -21,6 +45,28 @@ export class MailController {
   }
 
   @Get('send-confirmation-email')
+  @ApiOperation({ summary: 'Send a confirmation email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Confirmation email sent successfully',
+    content: {
+      'application/json': {
+        example: { message: 'Confirmation email sent successfully' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error sending confirmation email',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Error sending confirmation email',
+          error: 'Detailed error message',
+        },
+      },
+    },
+  })
   async sendConfirmationEmail() {
     const user = {
       email: 'pablod_ferrero@hotmail.com',
@@ -36,10 +82,52 @@ export class MailController {
     }
   }
 
-
-  @Post('verified-email/:token')
-  async verifiedEmail(@Param('token') token: string) {}
   @Post('send-coupon')
+  @ApiOperation({ summary: 'Send coupons to multiple users' })
+  @ApiBody({
+    description: 'Emails and coupons data',
+    schema: {
+      type: 'object',
+      properties: {
+        emails: {
+          type: 'array',
+          items: { type: 'string' },
+        },
+        coupons: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              couponCode: { type: 'string' },
+              discountPercentage: { type: 'number' },
+              expirationDate: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All coupons sent successfully',
+    content: {
+      'application/json': {
+        example: { message: 'All coupons sent successfully!' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid data provided',
+    content: {
+      'application/json': {
+        example: {
+          message:
+            'Invalid data provided. Ensure emails and coupons are provided in equal numbers.',
+        },
+      },
+    },
+  })
   async sendCoupon(
     @Body()
     data: {
@@ -76,6 +164,55 @@ export class MailController {
   }
 
   @Post('send-order')
+  @ApiOperation({ summary: 'Send order details to a user' })
+  @ApiBody({
+    description: 'Order details to send',
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        name: { type: 'string' },
+        orderDetails: {
+          type: 'object',
+          properties: {
+            orderId: { type: 'string' },
+            product: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  type: { type: 'string', enum: ['digital', 'physical'] },
+                },
+              },
+            },
+            total: { type: 'number' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Order details email sent successfully',
+    content: {
+      'application/json': {
+        example: { message: 'Order details email sent successfully!' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error sending order details email',
+    content: {
+      'application/json': {
+        example: {
+          message: 'Error sending order details email',
+          error: 'Detailed error message',
+        },
+      },
+    },
+  })
   async sendOrder(
     @Body()
     data: {
@@ -98,7 +235,6 @@ export class MailController {
       return { message: 'Error sending order details email', error };
     }
   }
-
 }
 
 

@@ -17,6 +17,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   UploadedFiles,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { ProductsService } from './products.service';
@@ -36,6 +37,8 @@ import { typeEnum } from './dto/type.enum';
 import { getProductsSchema } from './dto/get-products.dto';
 import { FilesService } from '../files/files.service';
 import type { PaginatedProductsDto } from './dto/paginated-products.dto';
+import { uuid } from 'drizzle-orm/pg-core';
+import { CategoriesService } from '../categories/categories.service';
 
 @Controller('products')
 @ApiTags('Products')
@@ -43,6 +46,7 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly filesService: FilesService,
+    private readonly categoryService: CategoriesService,
   ) {}
 
   @Post('create')
@@ -72,17 +76,31 @@ export class ProductsController {
       'aplication/json': {
         example: [
           {
-            id: '53c08a82-b37f-413c-8cfe-6a2ef697e82a',
+            id: 'db82d49f-d025-46bb-bdaf-efbc51f49e90',
             price: 1999,
             description: 'Prueba descripcion',
             type: 'digital',
             stock: 25,
             name: 'Prueba producto',
-            categoryId: 'c65397d5-6f4e-4173-bc16-6861585e0db6',
+            categoryId: '4a194a05-f3d0-4bcb-9a4b-a1e0fea24d87',
             imageUrl: 'imagen prueba',
-            active: true,
+            active: 'active',
           },
         ],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Category not found',
+    content: {
+      'application/json': {
+        example: {
+          message:
+            "Category with uuid 4a194a05-f3d0-4bcb-9a4b-a1e0fea23d87 didn't exist.",
+          error: 'Not Found',
+          statusCode: 404,
+        },
       },
     },
   })
@@ -107,7 +125,14 @@ export class ProductsController {
       ...body,
       price: Number(body.price),
       stock: Number(body.stock),
+      categoryId: String(body.categoryId),
     };
+    const categoryExists = await this.categoryService.findOne(
+      parsedBody.categoryId,
+    );
+    if (!categoryExists) {
+      throw new NotFoundException('Category not found');
+    }
 
     if (isNaN(parsedBody.price) || isNaN(parsedBody.stock)) {
       throw new BadRequestException(
@@ -163,63 +188,43 @@ export class ProductsController {
     description: 'Get All Paginated Products successfully',
     content: {
       'aplication/json': {
-        example: [
-          {
-            id: '9e8f808f-4dc3-4cce-ab3b-ee7d0f59396e',
-            price: 182,
-            type: 'digital',
-            name: 'that morning',
-            imageUrl: 'https://loremflickr.com/900/900?lock=2327064722111630',
-            active: true,
-            category: {
-              name: 'grocery',
+        example: {
+          data: [
+            {
+              id: '91e01092-6fbb-4310-9049-11429d488f94',
+              price: 199,
+              description:
+                'Experience the pinnacle of gaming keyboards with dynamic RGB backlighting and Cherry MX Speed switches.',
+              type: 'physical',
+              stock: 15,
+              name: 'Corsair K95 RGB Platinum XT Mechanical Gaming keyboard',
+              imageUrl:
+                'https://m.media-amazon.com/images/I/81bU6SBfbIL._SL1500_.jpg',
+              active: 'active',
+              category: {
+                id: 'b7b03dba-f1a3-4b52-a3c2-40d118afced0',
+                name: 'keyboard',
+              },
             },
-          },
-          {
-            id: 'f56c2000-c541-4f08-ba94-e18f83af17f4',
-            price: 956,
-            type: 'PHISICAL',
-            name: 'unfinished hierarchy',
-            imageUrl: 'https://loremflickr.com/900/900?lock=8733586377715857',
-            active: true,
-            category: {
-              name: 'baby',
+            {
+              id: 'ae1b3ced-a72f-46b0-b45a-a73935e471d0',
+              price: 55,
+              description:
+                'Race through beautiful, diverse landscapes in Mexico in the latest entry of the popular open-world racing series.',
+              type: 'digital',
+              stock: 10,
+              name: 'Forza Horizon 5',
+              imageUrl:
+                'https://m.media-amazon.com/images/I/81alOjHfU6L._SL1500_.jpg',
+              active: 'active',
+              category: {
+                id: '3af6e551-48ba-47b2-9e05-addec431c9e6',
+                name: 'racing',
+              },
             },
-          },
-          {
-            id: '82619689-2657-4e50-8960-0f3edf1931f4',
-            price: 320,
-            type: 'digital',
-            name: 'precious packaging',
-            imageUrl: 'https://loremflickr.com/900/900?lock=4483356518871534',
-            active: true,
-            category: {
-              name: 'Electronics',
-            },
-          },
-          {
-            id: '8e65da54-41f6-4e26-8645-abbcb14218ed',
-            price: 640,
-            type: 'PHISICAL',
-            name: 'frightened order',
-            imageUrl: 'https://loremflickr.com/900/900?lock=803921208177898',
-            active: true,
-            category: {
-              name: 'home',
-            },
-          },
-          {
-            id: '433b0239-9ac2-43a0-8933-6d893a316d1a',
-            price: 237,
-            type: 'PHISICAL',
-            name: 'triangular oil',
-            imageUrl: 'https://loremflickr.com/900/900?lock=1098080330168131',
-            active: true,
-            category: {
-              name: 'computers',
-            },
-          },
-        ],
+          ],
+          nextCursor: null,
+        },
       },
     },
   })
@@ -270,79 +275,36 @@ export class ProductsController {
   }
 
   @Get('dashboardTable')
-  async findDashboard(
-    @Query('limit', ParseIntPipe) limit: number,
-    @Query('cursor') cursor: string,
-  ) {
-    return await this.productsService.findAllDashboardProducts({
-      limit,
-      cursor,
-    });
-  }
-
-  @Get('category')
   @ApiResponse({
     status: 200,
-    description: 'Get All Paginated Products by Category successfully',
+    description: 'Get All Paginated Products successfully',
     content: {
       'aplication/json': {
-        example: [
-          {
-            id: 'df7062aa-e9bc-49dd-8d29-07244244fad3',
-            price: 158,
-            type: 'PHISICAL',
-            name: 'oily handle',
-            imageUrl: 'https://loremflickr.com/900/900?lock=8688651007005508',
-            active: true,
-            category: {
-              name: 'shoes',
+        example: {
+          data: [
+            {
+              name: 'Sekiro: Shadows Die Twice',
+              price: 45,
+              stock: 5,
+              id: '50dff90c-ff83-4478-8e8b-c23a13a9b969',
+              active: 'active',
+              type: 'digital',
+              imageUrl:
+                'https://m.media-amazon.com/images/I/81QGePML9XL._SL1500_.jpg',
             },
-          },
-          {
-            id: '9cf0e360-7cc8-4529-913f-bca60f79c85f',
-            price: 519,
-            type: 'digital',
-            name: 'mad pleasure',
-            imageUrl: 'https://loremflickr.com/900/900?lock=1807641517456240',
-            active: true,
-            category: {
-              name: 'shoes',
+            {
+              name: 'Warframe',
+              price: 14,
+              stock: 10,
+              id: '5971003d-4ad3-45d3-8da7-8c5eee2cba68',
+              active: 'active',
+              type: 'digital',
+              imageUrl:
+                'https://www.zonammorpg.com/wp-content/uploads/2023/11/warframe-300x300.png',
             },
-          },
-          {
-            id: '08dcb356-041e-4d02-9810-3b645bb8bd07',
-            price: 588,
-            type: 'digital',
-            name: 'difficult arcade',
-            imageUrl: 'https://loremflickr.com/900/900?lock=1368951004200504',
-            active: true,
-            category: {
-              name: 'shoes',
-            },
-          },
-          {
-            id: 'ef2298f0-378e-419a-b1e6-c0fcb751debe',
-            price: 10,
-            type: 'digital',
-            name: 'excited alb',
-            imageUrl: 'https://loremflickr.com/900/900?lock=7193111634341298',
-            active: true,
-            category: {
-              name: 'shoes',
-            },
-          },
-          {
-            id: '8a51b600-c841-4ff1-bb67-fc961aa1ee4b',
-            price: 732,
-            type: 'PHISICAL',
-            name: 'medium strategy',
-            imageUrl: 'https://loremflickr.com/900/900?lock=7441407100760783',
-            active: true,
-            category: {
-              name: 'shoes',
-            },
-          },
-        ],
+          ],
+          cursor: '5971003d-4ad3-45d3-8da7-8c5eee2cba68',
+        },
       },
     },
   })
@@ -371,6 +333,165 @@ export class ProductsController {
       },
     },
   })
+  @ApiOperation({ summary: 'Get All Dashboard Products' })
+  async findDashboard(
+    @Query('limit', ParseIntPipe) limit: number,
+    @Query('cursor') cursor: string,
+  ) {
+    return await this.productsService.findAllDashboardProducts({
+      limit,
+      cursor,
+    });
+  }
+
+  @Get('category')
+  @ApiResponse({
+    status: 200,
+    description: 'Get All Paginated Products by Category successfully',
+    content: {
+      'aplication/json': {
+        example: {
+          data: [
+            {
+              id: 'f8908f20-bd64-4e0c-a4a2-0c2d909d32b3',
+              price: 19,
+              description:
+                'Black Myth: Wukong is an action RPG inspired by Chinese mythology. Embark on a perilous journey filled with dangers and wonders to uncover the hidden truth behind a glorious past legend.',
+              type: 'digital',
+              stock: 10,
+              name: 'Black Myth: Wukong',
+              imageUrl:
+                'https://sm.ign.com/t/ign_ap/cover/b/black-myth/black-myth-wukong_fmws.300.jpg',
+              active: 'active',
+              category: {
+                id: '8e451330-04fd-4b28-aa3f-b32409e4bcc3',
+                name: 'action rpg',
+              },
+            },
+            {
+              id: '50dff90c-ff83-4478-8e8b-c23a13a9b969',
+              price: 45,
+              description:
+                'A brutally challenging action-adventure game where you play as a ninja seeking revenge in a dangerous, feudal Japan.',
+              type: 'digital',
+              stock: 5,
+              name: 'Sekiro: Shadows Die Twice',
+              imageUrl:
+                'https://m.media-amazon.com/images/I/81QGePML9XL._SL1500_.jpg',
+              active: 'active',
+              category: {
+                id: '8e451330-04fd-4b28-aa3f-b32409e4bcc3',
+                name: 'action rpg',
+              },
+            },
+            {
+              id: 'a939bc20-20eb-4bb2-a69b-c5eb72ba13b9',
+              price: 30,
+              description:
+                'Become Geralt of Rivia, a monster hunter, as you explore a vast world filled with quests, monsters, and moral dilemmas.',
+              type: 'digital',
+              stock: 6,
+              name: 'The Witcher 3: Wild Hunt',
+              imageUrl:
+                'https://m.media-amazon.com/images/I/71OIbEceZQL._SL1500_.jpg',
+              active: 'active',
+              category: {
+                id: '8e451330-04fd-4b28-aa3f-b32409e4bcc3',
+                name: 'action rpg',
+              },
+            },
+            {
+              id: '994071f3-039e-48e7-964a-88bdff0380e4',
+              price: 45,
+              description:
+                'Lead a Viking invasion of England, raiding villages, building settlements, and engaging in epic battles in this open-world RPG.',
+              type: 'digital',
+              stock: 7,
+              name: "Assassin's Creed Valhalla",
+              imageUrl:
+                'https://m.media-amazon.com/images/I/81OvbSYBoFL._SL1500_.jpg',
+              active: 'active',
+              category: {
+                id: '8e451330-04fd-4b28-aa3f-b32409e4bcc3',
+                name: 'action rpg',
+              },
+            },
+            {
+              id: '8329aff1-f04b-466a-8583-b368c5992512',
+              price: 40,
+              description:
+                'Return to the hellish world of Sanctuary in this remaster of the classic action RPG, filled with monsters and loot.',
+              type: 'digital',
+              stock: 6,
+              name: 'Diablo II: Resurrected',
+              imageUrl:
+                'https://m.media-amazon.com/images/I/81sHZml-v1L._SL1500_.jpg',
+              active: 'active',
+              category: {
+                id: '8e451330-04fd-4b28-aa3f-b32409e4bcc3',
+                name: 'action rpg',
+              },
+            },
+            {
+              id: '91a2dbc6-20eb-425d-8755-961614c7f2e5',
+              price: 35,
+              description:
+                'Hunt colossal monsters in a vast open world full of adventure. Challenge massive creatures and gather resources to upgrade your gear.',
+              type: 'digital',
+              stock: 475,
+              name: 'Monster Hunter: World',
+              imageUrl:
+                'https://m.media-amazon.com/images/I/81dMKVm7+pL._SL1500_.jpg',
+              active: 'active',
+              category: {
+                id: '8e451330-04fd-4b28-aa3f-b32409e4bcc3',
+                name: 'action rpg',
+              },
+            },
+          ],
+          nextCursor: '91a2dbc6-20eb-425d-8755-961614c7f2e5',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Products not found',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Products not found',
+          error: 'Not Found',
+          statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Error fetching Products',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Internal Server Error',
+          error: 'Error fetching Products',
+          statusCode: 500,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation failed',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Validation failed (uuid is expected)',
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    },
+  })
   @ApiOperation({ summary: 'Get All Products By Category' })
   async findByCategory(
     @Query('category') category: string,
@@ -391,18 +512,20 @@ export class ProductsController {
     content: {
       'aplication/json': {
         example: {
-          id: '98a00aa3-b9b2-4a06-9571-aa749ae7fe4d',
-          price: 435,
-          description: 'Vestrum abeo alias adflicto vir alienus vado.',
-          type: 'digital',
-          stock: 29,
-          name: 'monumental cafe',
-          categoryId: '3559389f-22f3-4e32-b94b-31a068f8a383',
-          imageUrl: 'https://loremflickr.com/900/900?lock=4666758142334750',
-          active: true,
+          id: 'f927067f-4127-4756-bba8-8891b2d0cc1a',
+          price: 179,
+          description:
+            'Stream and record in stunning 1080p60 HDR10 quality with ultra-low latency for smooth gameplay capture.',
+          type: 'physical',
+          stock: 18,
+          name: 'Elgato Game Capture HD60 S+',
+          categoryId: '74d95d0a-5faa-4e8b-a1bb-1809ffa88397',
+          imageUrl:
+            'https://m.media-amazon.com/images/I/51zXNTH7uKL._SL1000_.jpg',
+          active: 'active',
           category: {
-            id: '3559389f-22f3-4e32-b94b-31a068f8a383',
-            name: 'clothing',
+            id: '74d95d0a-5faa-4e8b-a1bb-1809ffa88397',
+            name: 'capture card',
           },
         },
       },
@@ -417,6 +540,32 @@ export class ProductsController {
           message: 'User by ID not found',
           error: 'Not Found',
           statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation failed',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Validation failed (uuid is expected)',
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation failed',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Validation failed (uuid is expected)',
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     },
@@ -445,13 +594,13 @@ export class ProductsController {
       'aplication/json': {
         example: [
           {
-            id: '98a00aa3-b9b2-4a06-9571-aa749ae7fe4d',
-            price: 435,
+            id: 'f8908f20-bd64-4e0c-a4a2-0c2d909d32b3',
+            price: 19,
             description: 'Example Description',
             type: 'digital',
-            stock: 29,
+            stock: 10,
             name: 'Example Name',
-            categoryId: '3559389f-22f3-4e32-b94b-31a068f8a383',
+            categoryId: '8e451330-04fd-4b28-aa3f-b32409e4bcc3',
           },
         ],
       },
@@ -463,9 +612,22 @@ export class ProductsController {
     content: {
       'aplication/json': {
         example: {
-          message: 'User not Found',
+          message: 'Product ID Not Found',
           error: 'Not Found',
           statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation failed',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Validation failed (uuid is expected)',
+          error: 'Bad Request',
+          statusCode: 400,
         },
       },
     },
@@ -522,8 +684,47 @@ export class ProductsController {
       },
     },
   })
+  @ApiResponse({
+    status: 200,
+    description: 'Image uploaded successfully',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Image uploaded Successfuly',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+    content: {
+      'aplication/json': {
+        example: {
+          message:
+            'Product with a8672166-4a1b-45c8-a8fa-567183aa9a95 uuid not found.',
+          error: 'Not Found',
+          statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'The image must be less than 1mb.',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'The image must be less than 1mb.',
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    },
+  })
   @UseInterceptors(FileInterceptor('image'))
   @Patch('uploadImage/:uuid')
+  @ApiOperation({ summary: 'Upload Product Image' })
   async updateProductImage(
     @Param('uuid', ParseUUIDPipe) productId: string,
     @UploadedFile(
@@ -545,6 +746,56 @@ export class ProductsController {
   }
 
   @Patch('removeImage/:uuid')
+  @ApiResponse({
+    status: 200,
+    description: 'Product image modified successfuly.',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Product image modified successfuly.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not Found',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Product not Found',
+          error: 'Not Found',
+          statusCode: 404,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Image is already removed',
+    content: {
+      'aplication/json': {
+        example: {
+          message: 'Image is already removed',
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    },
+  })
+  @ApiBody({
+    description: 'Request body for deleting image',
+    required: true,
+    schema: {
+      type: 'object',
+      properties: {
+        publicId: {
+          type: 'string',
+          example: 'pk3ghbuuvspa1wro9y7k',
+        },
+      },
+    },
+  })
   async removeProductImage(
     @Param('uuid', ParseUUIDPipe) productId: string,
     @Body() body: RemoveOneImageDto,

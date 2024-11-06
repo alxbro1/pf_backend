@@ -154,9 +154,7 @@ export class ProductsRepository {
 
   async findManyByIds(
     idArray: string[],
-  ): Promise<
-    Omit<ProductEntity, 'description' | 'imageUrl' | 'active'>[]
-  > {
+  ): Promise<Omit<ProductEntity, 'description' | 'imageUrl' | 'active'>[]> {
     const data = await db.query.products.findMany({
       where: inArray(products.id, idArray),
       columns: {
@@ -224,12 +222,31 @@ export class ProductsRepository {
       .returning();
 
     if (resultProduct.length === 0)
-      throw new NotFoundException(`User with ${productId} uuid not found.`);
+      throw new NotFoundException(`Product with ${productId} uuid not found.`);
 
-    return resultFile;
+    return { message: 'Image upload Successfuly' };
   }
 
   async removeProductImage(productId: string, publicId: string) {
+    const product = await db
+      .select({ imageUrl: products.imageUrl })
+      .from(products)
+      .where(eq(products.id, productId))
+      .limit(1);
+
+    if (product.length === 0) {
+      throw new NotFoundException(
+        `Product with ${productId} uuid doesn't exist.`,
+      );
+    }
+
+    if (
+      product[0].imageUrl ===
+      'https://res.cloudinary.com/dnfslkgiv/image/upload/v1726516516/muft4cnobocgkvbgj215.png'
+    ) {
+      throw new BadRequestException('Image is already removed');
+    }
+
     await this.filesService.removeSingleImage(publicId);
 
     const result = await db
@@ -241,17 +258,12 @@ export class ProductsRepository {
       .where(eq(products.id, productId))
       .returning();
 
-    if (result.length === 0)
+    if (result.length === 0) {
       throw new NotFoundException(
-        `Product with ${productId} uuid didn't exist.`,
+        `Product with ${productId} uuid doesn't exist.`,
       );
+    }
 
-    return { message: 'Product image modified successfuly.' };
-  }
-
-  async count() {
-    const count = await db.$count(products);
-
-    return count;
+    return { message: 'Product image modified successfully.' };
   }
 }
