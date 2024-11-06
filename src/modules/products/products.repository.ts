@@ -155,7 +155,7 @@ export class ProductsRepository {
   async findManyByIds(
     idArray: string[],
   ): Promise<
-    Omit<ProductEntity, 'description' | 'type' | 'imageUrl' | 'active'>[]
+    Omit<ProductEntity, 'description' | 'imageUrl' | 'active'>[]
   > {
     const data = await db.query.products.findMany({
       where: inArray(products.id, idArray),
@@ -165,6 +165,7 @@ export class ProductsRepository {
         price: true,
         stock: true,
         categoryId: true,
+        type: true,
       },
     });
     if (!data) throw new NotFoundException('Product not Found');

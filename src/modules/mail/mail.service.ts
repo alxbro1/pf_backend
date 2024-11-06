@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +7,7 @@ import { randomBytes } from 'crypto';
 import { db } from '../../config/db';
 import { users } from '../../../db/schemas/users.schema';
 import { eq } from 'drizzle-orm';
+
 
 @Injectable()
 export class MailService {
@@ -122,39 +122,80 @@ export class MailService {
 
   async sendOrderMail(
     user: { email: string; name: string },
-    orderDetails: { orderId: string; items: string; total: number },
+    orderDetails: {
+      orderId: string;
+      product: Array<{ name: string; type: 'digital' | 'physical' }>;
+      total: number;
+    },
   ) {
+    const hasPhysicalProducts = orderDetails.product.some(
+      (product) => product.type === 'physical',
+    );
+
+    let htmlContent = `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #333; color: #fff; border-radius: 8px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
+    </div>
+    <h2 style="color: #007BFF; text-align: center;">Thank you for your order, ${user.name}!</h2>
+    <p style="font-size: 16px; text-align: center;">We are pleased to inform you that your order has been successfully received.</p>
+    
+    <div style="background-color: #444; border: 1px solid #555; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <h3 style="color: #fff; border-bottom: 1px solid #555; padding-bottom: 10px;">Order Details</h3>
+      <p style="margin: 8px 0;"><strong>Order ID:</strong> ${orderDetails.orderId}</p>
+      <p style="margin: 8px 0;"><strong>Items:</strong></p>
+      <ul style="list-style: none; padding: 0;">
+        ${orderDetails.product
+          .map(
+            (product) => `
+          <li style="margin-bottom: 5px; color: #fff;">
+            ${product.name}
+            ${product.type === 'physical' ? '<strong style="color: yellow;"> - This item will be shipped!</strong>' : ''}
+          </li>
+        `,
+          )
+          .join('')}
+      </ul>
+      <p style="margin: 8px 0;"><strong>Total:</strong> $${orderDetails.total.toFixed(2)}</p>
+    </div>
+
+    <p style="font-size: 16px; text-align: center;">To see more details about your order, click the button below:</p>
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="https://gamevault.com/orders/${orderDetails.orderId}" 
+        style="display: inline-block; padding: 12px 24px; background-color: #007BFF; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
+        View My Order
+      </a>
+    </div>
+
+    <p style="font-size: 14px; text-align: center; margin-top: 20px;">If you have any questions, feel free to <a href="https://gamevault.com/contact" style="color: #007BFF;">contact us</a>.</p>
+    <p style="font-size: 14px; text-align: center;">We hope you enjoy your purchase!<br>The GameVault Team</p>
+  </div>
+`;
+
+    if (hasPhysicalProducts) {
+      htmlContent += `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; background-color: #444; color: #fff; border-radius: 8px;">
+      <p style="font-size: 16px; text-align: center;">
+        <strong>Notice:</strong> Your order contains physical products. These will be shipped to you.
+      </p>
+      <p style="font-size: 16px; text-align: center;">
+        Once your order is delivered, you can update its status by clicking the following link:
+      </p>
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="http://localhost:3001/orders/deliver/${orderDetails.orderId}" 
+          style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
+          Mark as Delivered
+        </a>
+      </div>
+    </div>
+  `;
+    }
+
     const mailOptions = {
       from: "'GameVault' <pablobattola@gmail.com>",
       to: user.email,
       subject: 'Your Order Details at GameVault',
-      html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4; color: #333; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
-        </div>
-        <h2 style="color: #007BFF; text-align: center;">Thank you for your order, ${user.name}!</h2>
-        <p style="font-size: 16px; text-align: center;">We are pleased to inform you that your order has been successfully received.</p>
-        
-        <div style="background-color: #ffffff; border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Order Details</h3>
-          <p style="margin: 8px 0;"><strong>Order ID:</strong> ${orderDetails.orderId}</p>
-          <p style="margin: 8px 0;"><strong>Items:</strong> ${orderDetails.items}</p>
-          <p style="margin: 8px 0;"><strong>Total:</strong> $${orderDetails.total.toFixed(2)}</p>
-        </div>
-
-        <p style="font-size: 16px; text-align: center;">To see more details about your order, click the button below:</p>
-        <div style="text-align: center; margin: 20px 0;">
-          <a href="https://gamevault.com/orders/${orderDetails.orderId}" 
-            style="display: inline-block; padding: 12px 24px; background-color: #007BFF; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
-            View My Order
-          </a>
-        </div>
-
-        <p style="font-size: 14px; text-align: center; margin-top: 20px;">If you have any questions, feel free to <a href="https://gamevault.com/contact" style="color: #007BFF;">contact us</a>.</p>
-        <p style="font-size: 14px; text-align: center;">We hope you enjoy your purchase!<br>The GameVault Team</p>
-      </div>
-    `,
+      html: htmlContent,
       attachments: [
         {
           filename: 'logo.png',
@@ -168,63 +209,45 @@ export class MailService {
       const info = await this.transporter.sendMail(mailOptions);
       console.log(`Order email sent: ${info.messageId}`);
     } catch (error) {
-      console.error('Error sending order email:', error);
+      console.error(
+        'Error sending order email or marking order as delivered:',
+        error,
+      );
     }
   }
 
-  async sendPreparationMail(
-    user: { email: string; name: string },
-    orderId: string,
-  ) {
-    const mailOptions = {
-      from: "'GameVault' <pablobattola@gmail.com>",
-      to: user.email,
-      subject: 'Your Order is Being Prepared',
-      html: `
-      <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f2f2f2;">
-        <h2 style="color: #333;">Hello, ${user.name}!</h2>
-        <p>We are pleased to inform you that your order #${orderId} is being prepared.</p>
+  async sendDeliveredConfirmationMail(user: { email: string }) {
+    const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #333; color: #fff; border-radius: 8px;">
+      <div style="text-align: center; margin-bottom: 20px;">
         <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
-        <p>We are working to get it ready for shipment soon!</p>
-        <p>Stay tuned for more updates!</p>
       </div>
-    `,
-      attachments: [
-        {
-          filename: 'logo.png',
-          path: 'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730565786/dlin5sg99n8avumxxpal.jpg',
-          cid: 'logo@gamevault',
-        },
-      ],
-    };
+      <h2 style="color: #28a745; text-align: center;">Thank You for Your Purchase!</h2>
+      <p style="font-size: 16px; text-align: center;">Hello,</p>
+      <p style="font-size: 16px; text-align: center;">Your order has been successfully delivered. We hope you are enjoying your purchase!</p>
+      
+      <div style="background-color: #444; border: 1px solid #555; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #fff; border-bottom: 1px solid #555; padding-bottom: 10px;">Thank You for Shopping with Us!</h3>
+        <p style="margin: 8px 0; color: #ddd;">We hope you're enjoying your purchase. If you need any help or have any questions, feel free to reach out to us.</p>
+      </div>
 
-    try {
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log(`Preparation email sent: ${info.messageId}`);
-    } catch (error) {
-      console.error('Error sending preparation email:', error);
-    }
-  }
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="https://gamevault.com/contact" 
+          style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
+          Contact Us
+        </a>
+      </div>
 
-  async sendDispatchedMail(
-    user: { email: string; name: string },
-    orderId: string,
-    trackingNumber: string,
-  ) {
+      <p style="font-size: 14px; text-align: center; margin-top: 20px;">Thank you again for choosing GameVault. We look forward to serving you again!</p>
+      <p style="font-size: 14px; text-align: center;">Best regards,<br>The GameVault Team</p>
+    </div>
+  `;
+
     const mailOptions = {
       from: "'GameVault' <pablobattola@gmail.com>",
       to: user.email,
-      subject: 'Your order has been dispatched!',
-      html: `
-    <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f2f2f2;">
-      <h2 style="color: #333;">Hello, ${user.name}!</h2>
-      <p>Your order #${orderId} has been dispatched!</p>
-      <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
-      <p>The tracking number for your order is: <strong>${trackingNumber}</strong>.</p>
-      <p>You can follow the shipment on the courier's website with this number.</p>
-      <p style="color: #333;">Thank you for choosing <strong>GameVault</strong>.</p>
-    </div>
-  `,
+      subject: 'Thank You for Your Purchase!',
+      html: htmlContent,
       attachments: [
         {
           filename: 'logo.png',
@@ -233,91 +256,15 @@ export class MailService {
         },
       ],
     };
+
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      console.log(`Dispatched email sent: ${info.messageId}`);
+      console.log(`Purchase confirmation email sent: ${info.messageId}`);
     } catch (error) {
-      console.error('Error sending dispatched email:', error);
+      console.error('Error sending purchase confirmation email:', error);
     }
   }
 
-  async sendOnTheWayMail(
-    user: { email: string; name: string },
-    orderId: string,
-    trackingNumber: string,
-  ) {
-    const mailOptions = {
-      from: "'GameVault' <pablobattola@gmail.com>",
-      to: user.email,
-      subject: 'Your order is on its way',
-      html: `
-    <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f2f2f2;">
-      <h2 style="color: #333;">Hello, ${user.name}!</h2>
-      <p>We want to inform you that your order #${orderId} is on its way.</p>
-      <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
-      <p>You can track the shipment status with this tracking number: <strong>${trackingNumber}</strong>.</p>
-      <p>Thank you for choosing <strong>GameVault</strong>.</p>
-    </div>
-  `,
-      attachments: [
-        {
-          filename: 'logo.png',
-          path: 'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730565786/dlin5sg99n8avumxxpal.jpg',
-          cid: 'logo@gamevault',
-        },
-      ],
-    };
-    try {
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log(`On the way email sent: ${info.messageId}`);
-    } catch (error) {
-      console.error('Error sending on the way email:', error);
-    }
-  }
-
-  async sendDeliveredMail(
-    user: { email: string; name: string },
-    orderId: string,
-  ) {
-    const mailOptions = {
-      from: "'GameVault' <pablobattola@gmail.com>",
-      to: user.email,
-      subject: 'Your order has been delivered!',
-      html: `
-    <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f2f2f2;">
-      <h2 style="color: #333;">Hello, ${user.name}!</h2>
-      <p>We are pleased to inform you that your order #${orderId} has been successfully delivered.</p>
-      <img src="cid:logo@gamevault" alt="GameVault" style="width: 100%; max-width: 600px;"/>
-      <p>We hope you enjoy your purchase.</p>
-      <p>Thank you for trusting <strong>GameVault</strong>. If you have any questions, feel free to contact us.</p>
-    </div>
-  `,
-      attachments: [
-        {
-          filename: 'logo.png',
-          path: 'https://res.cloudinary.com/dnfslkgiv/image/upload/v1730565786/dlin5sg99n8avumxxpal.jpg',
-          cid: 'logo@gamevault',
-        },
-      ],
-    };
-    try {
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log(`Delivered email sent: ${info.messageId}`);
-    } catch (error) {
-      console.error('Error sending delivered email:', error);
-    }
-  }
-
-  async verifiedEmail(token: string) {
-    const result = await db
-      .update(users)
-      .set({ emailVerified: new Date() })
-      .where(eq(users.tokenConfirmation, token))
-      .returning();
-
-    if (result.length === 0)
-      throw new BadRequestException(`Token invalid or deprecated.`);
-  }
   async sendCouponMail(
     user: { email: string },
     coupon: {

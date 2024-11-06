@@ -15,9 +15,12 @@ import {
   PaginationByUserDto,
   PaginationCursorNumberDto,
 } from '../../schemas/pagination.dto';
+import { UserEntity, users } from '../../../db/schemas/users.schema';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class ordersRepository {
+  constructor(private readonly mailService: MailService){}
   async create(data: CreateOrderDto) {
     const order = (await db
       .insert(orders)
@@ -154,5 +157,50 @@ export class ordersRepository {
       data: selectedOrders,
       nextCursor,
     };
+  }
+
+  async markOrderAsDelivered(orderId: number) {
+    const order = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .execute();
+
+    if (order.length === 0) {
+      throw new BadRequestException('Order not found');
+    }
+
+    if (order[0].shippingStatus === 'delivered') {
+      throw new BadRequestException('Order is already marked as delivered');
+    }
+
+    const dbResponse = await db
+      .update(orders)
+      .set({ shippingStatus: 'delivered' })
+      .where(eq(orders.id, orderId))
+      .execute();
+
+    if (dbResponse.rowCount === 0) {
+      throw new BadRequestException('Error updating order status');
+    }
+
+    let user: UserEntity | null = null;
+    if (order[0].userId !== null) {
+      const userResponse = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, order[0].userId))
+        .execute();
+
+      if (userResponse.length > 0) {
+        user = userResponse[0];
+      }
+    }
+
+    if (user) {
+      await this.mailService.sendDeliveredConfirmationMail(user);
+    }
+
+    return { order: order[0], user: user || null };
   }
 }
