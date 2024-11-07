@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -90,7 +91,7 @@ export class MailService {
         <p style="font-size: 16px; text-align: center;">To get started, please confirm your account by clicking the button below:</p>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="http://localhost:3001/mail/verified-email/${tokenGenerated}" 
+          <a href="http://game-vault-backend-9vh9.vercel.app/mail/verified-email/${tokenGenerated}" 
              style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
             Confirm Account
           </a>
@@ -98,7 +99,7 @@ export class MailService {
         
         <p style="font-size: 14px; color: #ccc; text-align: center;">If the button doesn't work, copy and paste the following link into your browser:</p>
         <p style="font-size: 14px; color: #007BFF; text-align: center;">
-          <a href="http://localhost:3001/mail/verified-email/${tokenGenerated}" style="color: #007BFF;">http://localhost:3001/mail/verified-email/${tokenGenerated}</a>
+          <a href="http://game-vault-backend-9vh9.vercel.app/mail/verified-email/${tokenGenerated}" style="color: #007BFF;">http://game-vault-backend-9vh9.vercel.app/mail/verified-email/${tokenGenerated}</a>
         </p>
 
         <div style="text-align: center; margin-top: 20px;">
@@ -190,7 +191,7 @@ export class MailService {
         Once your order is delivered, you can update its status by clicking the following link:
       </p>
       <div style="text-align: center; margin: 20px 0;">
-        <a href="http://localhost:3001/orders/deliver/${orderDetails.orderId}?redirect=true" 
+        <a href="http://game-vault-backend-9vh9.vercel.app/orders/deliver/${orderDetails.orderId}?redirect=true" 
           style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: #ffffff; text-decoration: none; font-size: 16px; border-radius: 5px;">
           Mark as Delivered
         </a>
@@ -327,5 +328,15 @@ export class MailService {
     } catch (error) {
       console.error('Error sending coupon email:', error);
     }
+  }
+  async verifiedEmail(token: string) {
+    const result = await db
+      .update(users)
+      .set({ emailVerified: new Date() })
+      .where(eq(users.tokenConfirmation, token))
+      .returning();
+
+    if (result.length == 0)
+      throw new BadRequestException("Invalid or deprectaed token.");
   }
 }

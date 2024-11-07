@@ -235,6 +235,10 @@ export class MailController {
       return { message: 'Error sending order details email', error };
     }
   }
+  @Post('verified-email/:token')
+  async verifiedEmail(@Param('token') token: string) {
+    return await this.mailService.verifiedEmail(token);
+  }
 }
 
 
